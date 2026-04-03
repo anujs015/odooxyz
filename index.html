@@ -725,7 +725,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
       <div class="frow"><label>Odoo URL</label><input type="text" id="p-url" placeholder="https://client.odoo.com"></div>
       <div class="frow"><label>Database Name</label><input type="text" id="p-db" placeholder="client-database-name"></div>
       <div class="frow"><label>Login Email</label><input type="email" id="p-login" placeholder="admin@client.com"></div>
-      <div class="frow"><label>Password</label><input type="password" id="p-pass" placeholder="••••••••"></div>
+      <div class="frow"><label>API Key <span style="font-weight:400;font-size:10px;color:var(--grey-400)">(Settings → Technical → API Keys in Odoo)</span></label><input type="password" id="p-apikey" placeholder="Paste your Odoo API key here"></div>
       <div class="frow">
         <label>Project Color</label>
         <div class="color-dots">
@@ -742,6 +742,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
     </div>
     <div class="modal-foot">
       <button class="btn-secondary" onclick="closeModal('proj-modal')">Cancel</button>
+      <button class="btn-secondary btn-odoo" onclick="testProjConnection()" id="test-conn-btn">🔗 Test Connection</button>
       <button class="btn-primary" onclick="saveProj()">Create Project</button>
     </div>
   </div>
@@ -778,7 +779,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
           <div class="stab-content active" id="profile-info">
             <div class="profile-av-area">
               <div class="pav-big" id="pav-big">U</div>
-              <div><div class="pav-nm" id="pav-nm">User</div><div class="pav-em" id="pav-em">user@email.com</div></div>
+              <div><div class="pav-nm" id="pav-nm">User</div><div class="pav-em" id="pav-em"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="f782849285b7929a969e9bd994989a">[email&#160;protected]</a></div></div>
               <button class="pav-edit" onclick="toast('Photo upload coming soon')">Change Photo</button>
             </div>
             <div class="frow"><label>Full Name</label><input type="text" id="pf-name" placeholder="Your full name"></div>
@@ -956,9 +957,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 <div class="overlay" id="gh-modal">
   <div class="modal" style="max-width:480px;">
     <div class="modal-hdr"><div class="modal-title">GitHub Integration</div><button class="modal-x" onclick="closeModal('gh-modal')">✕</button></div>
-    <div class="modal-body">
-      <div class="gh-connect">
-        <div class="gh-icon"><svg width="52" height="52" viewBox="0 0 24 24" fill="#24292e"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg></div>
+    <div class="mo" fill="#24292e"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg></div>
         <div class="gh-status no" id="gh-status">Not Connected to GitHub</div>
         <button class="gh-btn" onclick="connectGh()"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg> Connect GitHub Account</button>
       </div>
@@ -984,8 +983,13 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 
 <script>
 // ══ GEMINI API KEY — REPLACE THIS ══
-const GEMINI_API_KEY = 'AIzaSyA4PMiF-2Rq4O4Viwelfsk__hazLdeYGqc';
+const GEMINI_API_KEY = 'AIzaSyCppcG_kagMTSI4v47XM-WDvVWMvCqUJTQ';
 const GEMINI_MODEL = 'gemini-1.5-flash';
+
+// ══ BACKEND URL — SET THIS AFTER DEPLOYING ON RAILWAY ══
+// Example: 'https://odooxyz-backend-production.up.railway.app'
+// Leave empty string '' if backend not yet deployed
+const BACKEND_URL = 'web-production-d6dc3.up.railway.app';
 
 // ══ STATE ══
 let sessions = JSON.parse(localStorage.getItem('xyz_sessions') || '[]');
@@ -1085,7 +1089,39 @@ For sales order ask:
 5. Payment terms?
 
 Always be friendly, professional, and thorough.
-Format responses clearly with bullet points when listing items.`;
+Format responses clearly with bullet points when listing items.
+
+═══════════════════════════════════════════
+EXECUTING ODOO OPERATIONS (BACKEND CONNECTED)
+═══════════════════════════════════════════
+
+When the user confirms with "Yes" and you are ready to execute on Odoo, you MUST output the action as a special block AFTER your confirmation message. Use EXACTLY this format:
+
+[ODOO_ACTION]
+{
+  "model": "res.partner",
+  "method": "create",
+  "args": [{"name": "ABC Pvt Ltd", "email": "abc@test.com", "is_company": true}],
+  "kwargs": {},
+  "description": "Creating customer ABC Pvt Ltd"
+}
+[/ODOO_ACTION]
+
+Common model/method pairs:
+- Create customer:    model="res.partner",       method="create",      args=[{"name":"...", "email":"...", "phone":"...", "is_company":true, "customer_rank":1}]
+- Create product:     model="product.template",  method="create",      args=[{"name":"...", "list_price":0, "standard_price":0, "type":"service"}]
+- Create sales order: model="sale.order",        method="create",      args=[{"partner_id":ID, "order_line":[[0,0,{"product_id":PID,"product_uom_qty":1,"price_unit":0}]]}]
+- Search customers:   model="res.partner",       method="search_read", args=[[["is_company","=",true]]], kwargs={"fields":["id","name","email"],"limit":10}
+- Search products:    model="product.template",  method="search_read", args=[[]], kwargs={"fields":["id","name","list_price"],"limit":10}
+- Create invoice:     model="account.move",      method="create",      args=[{"move_type":"out_invoice","partner_id":ID,"invoice_line_ids":[[0,0,{"name":"...","quantity":1,"price_unit":0}]]}]
+
+IMPORTANT: Only output the [ODOO_ACTION] block when:
+1. User has confirmed with "Yes"
+2. You have ALL required information
+3. Backend is connected (the frontend will check this automatically)
+
+If backend is not connected, instead say: "⚠️ Backend not connected. Please configure the backend URL in settings to execute operations on Odoo. For now, here are the manual steps: ..."`;
+}
 }
 
 // ══ LOGIN ══
@@ -1244,16 +1280,34 @@ function saveProj() {
   const url = document.getElementById('p-url').value.trim();
   const db = document.getElementById('p-db').value.trim();
   const login = document.getElementById('p-login').value.trim();
-  const pass = document.getElementById('p-pass').value.trim();
+  const apiKey = document.getElementById('p-apikey').value.trim();
   if (!client || !name) { toast('Please fill Client Name and Project Name'); return; }
-  const proj = { id: Date.now().toString(), client, name, url, db, login, pass, color: selColor_val };
+  const proj = { id: Date.now().toString(), client, name, url, db, login, apiKey, color: selColor_val };
   projects.push(proj);
   localStorage.setItem('xyz_projects', JSON.stringify(projects));
   closeModal('proj-modal');
   renderProjects();
   selectProj(proj.id);
   toast(`✅ Project "${name}" created!`);
-  ['p-client','p-name','p-url','p-db','p-login','p-pass'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+  ['p-client','p-name','p-url','p-db','p-login','p-apikey'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+}
+
+async function testProjConnection() {
+  const url    = document.getElementById('p-url').value.trim();
+  const db     = document.getElementById('p-db').value.trim();
+  const login  = document.getElementById('p-login').value.trim();
+  const apiKey = document.getElementById('p-apikey').value.trim();
+  if (!url || !db || !login || !apiKey) { toast('⚠️ Fill in URL, Database, Login and API Key first'); return; }
+  if (!BACKEND_URL) { toast('⚠️ BACKEND_URL not set in index.html yet'); return; }
+  const btn = document.getElementById('test-conn-btn');
+  btn.textContent = '⏳ Testing…'; btn.disabled = true;
+  const result = await testOdooConnection({ url, db, login, apiKey });
+  btn.textContent = '🔗 Test Connection'; btn.disabled = false;
+  if (result.success) {
+    toast(`✅ ${result.message}`);
+  } else {
+    toast(`❌ ${result.error}`);
+  }
 }
 
 function delProj(id) {
@@ -1492,17 +1546,47 @@ async function sendMsg() {
   showTyping();
 
   try {
-    const resp = await callGemini(text || 'Analyse the attached files');
+    const rawResp = await callGemini(text || 'Analyse the attached files');
     removeTyping();
-    messages.push({ role: 'ai', content: resp });
-    const used = deductCredits(estimateCredits(text, resp));
-    renderMsg('ai', resp);
+
+    // Parse for Odoo action blocks
+    const { cleanText, action } = parseOdooAction(rawResp);
+    const used = deductCredits(estimateCredits(text, rawResp));
+
+    // Show the AI's text response (without the raw JSON block)
+    messages.push({ role: 'ai', content: cleanText });
+    renderMsg('ai', cleanText);
+
     // Credit badge
     const area = document.getElementById('msgs-area');
     const badge = document.createElement('div');
     badge.style.cssText = 'padding:0 24px;max-width:860px;margin:0 auto;width:100%;';
     badge.innerHTML = `<span class="msg-credit">⚡ ${used} credits used</span>`;
     area.appendChild(badge);
+
+    // If AI wants to run an Odoo operation, execute it via backend
+    if (action) {
+      const execRow = document.createElement('div');
+      execRow.style.cssText = 'padding:0 24px;max-width:860px;margin:6px auto;width:100%;';
+      execRow.innerHTML = `<span style="background:var(--primary-light);border:1px solid var(--primary);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--primary);font-weight:600;">⚙️ Executing on Odoo: ${action.description || action.model + '.' + action.method}…</span>`;
+      area.appendChild(execRow);
+      area.scrollTop = area.scrollHeight;
+
+      const result = await executeOdooAction(action);
+
+      if (result.success) {
+        const successMsg = `✅ Done! Successfully executed on Odoo.\n\nResult: ${JSON.stringify(result.result, null, 2)}\n\n${typeof result.result === 'number' ? `Record ID created: ${result.result}` : ''}`;
+        messages.push({ role: 'ai', content: successMsg });
+        renderMsg('ai', successMsg);
+        execRow.remove();
+      } else {
+        const errMsg = `❌ Odoo operation failed.\n\n${result.error}\n\nPlease check your project credentials in Settings → Projects.`;
+        messages.push({ role: 'ai', content: errMsg });
+        renderMsg('ai', errMsg);
+        execRow.remove();
+      }
+    }
+
     saveSess(messages[0].content);
   } catch(err) {
     removeTyping();
@@ -1525,8 +1609,8 @@ function estimateCredits(input, output) {
 
 // ══ GEMINI API CALL ══
 async function callGemini(userMessage) {
-  if (!GEMINI_API_KEY || GEMINI_API_KEY === 'AIzaSyA4PMiF-2Rq4O4Viwelfsk__hazLdeYGqc') {
-    return `⚠️ Gemini API key not configured yet!\n\nTo make OdooXYZ work:\n1. Go to aistudio.google.com\n2. Create API key\n3. Open this HTML file\n4. Find: const GEMINI_API_KEY = 'YOUR_GEMINI_API_KEY_HERE'\n5. Replace with your actual key\n6. Save and refresh\n\nFor now I can show you how the interface works!`;
+  if (!GEMINI_API_KEY || GEMINI_API_KEY === 'AIzaSyCppcG_kagMTSI4v47XM-WDvVWMvCqUJTQ') {
+    return `⚠️ Gemini API key not configured yet!\n\nTo make OdooXYZ work:\n1. Go to aistudio.google.com\n2. Create API key\n3. Open this HTML file\n4. Find: const GEMINI_API_KEY = 'AIzaSyCppcG_kagMTSI4v47XM-WDvVWMvCqUJTQ'\n5. Replace with your actual key\n6. Save and refresh\n\nFor now I can show you how the interface works!`;
   }
 
   const systemPrompt = buildSystemPrompt();
@@ -1549,6 +1633,83 @@ async function callGemini(userMessage) {
   const data = await resp.json();
   if (data.error) throw new Error(data.error.message);
   return data.candidates?.[0]?.content?.parts?.[0]?.text || 'Could not get response. Please try again.';
+}
+
+// ══ ODOO BACKEND EXECUTION ══
+
+/**
+ * Parse AI response for [ODOO_ACTION]...[/ODOO_ACTION] blocks
+ * Returns { cleanText, action } or { cleanText, action: null }
+ */
+function parseOdooAction(text) {
+  const match = text.match(/\[ODOO_ACTION\]([\s\S]*?)\[\/ODOO_ACTION\]/);
+  if (!match) return { cleanText: text, action: null };
+  const cleanText = text.replace(/\[ODOO_ACTION\][\s\S]*?\[\/ODOO_ACTION\]/, '').trim();
+  try {
+    const action = JSON.parse(match[1].trim());
+    return { cleanText, action };
+  } catch (e) {
+    console.error('Failed to parse ODOO_ACTION JSON:', e);
+    return { cleanText: text, action: null };
+  }
+}
+
+/**
+ * Execute an Odoo operation via the backend
+ */
+async function executeOdooAction(action) {
+  const proj = projects.find(p => p.id === curProject);
+
+  if (!BACKEND_URL) {
+    return {
+      success: false,
+      error: '⚠️ Backend URL not configured. Open index.html → find BACKEND_URL → paste your Railway URL.'
+    };
+  }
+  if (!proj) {
+    return { success: false, error: '⚠️ No project selected. Please select a project first.' };
+  }
+  if (!proj.url || !proj.db || !proj.login || !proj.apiKey) {
+    return { success: false, error: '⚠️ Project missing Odoo credentials. Go to Settings → Projects and fill in URL, Database, Login, and API Key.' };
+  }
+
+  try {
+    const resp = await fetch(`${BACKEND_URL}/api/odoo/execute`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        url:      proj.url,
+        db:       proj.db,
+        username: proj.login,
+        api_key:  proj.apiKey,
+        model:    action.model,
+        method:   action.method,
+        args:     action.args || [],
+        kwargs:   action.kwargs || {}
+      })
+    });
+    const data = await resp.json();
+    return data;
+  } catch (e) {
+    return { success: false, error: `Network error: ${e.message}. Is your Railway backend running?` };
+  }
+}
+
+/**
+ * Test connection to Odoo via backend
+ */
+async function testOdooConnection(proj) {
+  if (!BACKEND_URL) return { success: false, error: 'Backend URL not set' };
+  try {
+    const resp = await fetch(`${BACKEND_URL}/api/odoo/connect`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url: proj.url, db: proj.db, username: proj.login, api_key: proj.apiKey })
+    });
+    return await resp.json();
+  } catch (e) {
+    return { success: false, error: e.message };
+  }
 }
 
 // ══ MODALS ══
