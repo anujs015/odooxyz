@@ -1,0 +1,1633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OdooXYZ — AI-Powered Odoo Implementation</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary: #7C3AED;
+  --primary-dark: #5B21B6;
+  --primary-light: #EDE9FE;
+  --primary-glow: #A78BFA;
+  --accent: #06B6D4;
+  --accent-light: #CFFAFE;
+  --white: #FFFFFF;
+  --bg: #FAFAFA;
+  --grey-50: #F9FAFB;
+  --grey-100: #F3F4F6;
+  --grey-200: #E5E7EB;
+  --grey-300: #D1D5DB;
+  --grey-400: #9CA3AF;
+  --grey-600: #4B5563;
+  --grey-700: #374151;
+  --grey-800: #1F2937;
+  --grey-900: #111827;
+  --green: #10B981;
+  --green-light: #D1FAE5;
+  --orange: #F59E0B;
+  --orange-light: #FEF3C7;
+  --red: #EF4444;
+  --red-light: #FEE2E2;
+  --sidebar: #0F0F23;
+  --sidebar-hover: rgba(124,58,237,0.15);
+  --sidebar-active: rgba(124,58,237,0.25);
+  --sidebar-border: rgba(255,255,255,0.06);
+  --sidebar-text: rgba(255,255,255,0.75);
+  --sidebar-muted: rgba(255,255,255,0.3);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-lg: 16px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.07), 0 4px 16px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 24px rgba(0,0,0,0.08);
+  --shadow-lg: 0 8px 40px rgba(0,0,0,0.12);
+  --shadow-purple: 0 8px 32px rgba(124,58,237,0.25);
+  --sidebar-width: 272px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--grey-800); height: 100vh; overflow: hidden; }
+
+/* ════════════════════════════════
+   ANIMATIONS
+════════════════════════════════ */
+@keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(28px) } to { opacity: 1; transform: translateY(0) } }
+@keyframes slideDown { from { opacity: 0; transform: translateY(-8px) } to { opacity: 1; transform: translateY(0) } }
+@keyframes slideInUp { from { opacity: 0; transform: translateY(12px) } to { opacity: 1; transform: translateY(0) } }
+@keyframes pulse { 0%, 100% { opacity: 1 } 50% { opacity: 0.4 } }
+@keyframes bounce { 0%, 60%, 100% { transform: translateY(0) } 30% { transform: translateY(-6px) } }
+@keyframes shimmer { from { background-position: -200% 0 } to { background-position: 200% 0 } }
+@keyframes spin { to { transform: rotate(360deg) } }
+@keyframes creditPop { 0% { transform: scale(1) } 50% { transform: scale(1.2) } 100% { transform: scale(1) } }
+@keyframes glow { 0%, 100% { box-shadow: 0 0 8px rgba(124,58,237,0.3) } 50% { box-shadow: 0 0 20px rgba(124,58,237,0.6) } }
+
+/* ════════════════════════════════
+   LOGIN
+════════════════════════════════ */
+#login-page {
+  position: fixed; inset: 0; z-index: 1000;
+  background: linear-gradient(135deg, #0F0F23 0%, #1A0A3E 40%, #0D1B3E 100%);
+  display: flex; align-items: center; justify-content: center;
+}
+.login-mesh {
+  position: absolute; inset: 0;
+  background-image:
+    radial-gradient(ellipse at 20% 50%, rgba(124,58,237,0.2) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(6,182,212,0.15) 0%, transparent 40%),
+    radial-gradient(ellipse at 60% 80%, rgba(124,58,237,0.1) 0%, transparent 40%);
+}
+.login-grid {
+  position: absolute; inset: 0;
+  background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+.login-card {
+  position: relative; background: rgba(255,255,255,0.97);
+  border-radius: 24px; padding: 44px 48px; width: 460px;
+  box-shadow: 0 40px 100px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.1);
+  animation: slideUp 0.7s cubic-bezier(0.34,1.56,0.64,1);
+}
+.login-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 32px; }
+.brand-icon {
+  width: 44px; height: 44px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-glow));
+  border-radius: 13px; display: flex; align-items: center; justify-content: center;
+  font-size: 20px; box-shadow: var(--shadow-purple);
+}
+.brand-name { font-size: 22px; font-weight: 800; color: var(--grey-900); letter-spacing: -0.5px; }
+.brand-tag { font-size: 11px; color: var(--grey-400); font-weight: 400; margin-top: 1px; }
+.login-heading { font-size: 26px; font-weight: 800; color: var(--grey-900); letter-spacing: -0.5px; margin-bottom: 6px; }
+.login-sub { font-size: 14px; color: var(--grey-400); margin-bottom: 28px; line-height: 1.5; }
+.field { margin-bottom: 16px; }
+.field label { display: block; font-size: 12px; font-weight: 700; color: var(--grey-700); margin-bottom: 7px; letter-spacing: 0.3px; text-transform: uppercase; }
+.field input {
+  width: 100%; padding: 13px 16px;
+  border: 2px solid var(--grey-200); border-radius: var(--radius-sm);
+  font-size: 14px; font-family: 'Plus Jakarta Sans', sans-serif;
+  color: var(--grey-800); background: var(--grey-50);
+  transition: all 0.2s; outline: none;
+}
+.field input:focus { border-color: var(--primary); background: white; box-shadow: 0 0 0 4px rgba(124,58,237,0.1); }
+.login-btn {
+  width: 100%; padding: 14px; margin-top: 8px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-glow));
+  color: white; border: none; border-radius: var(--radius-sm);
+  font-size: 15px; font-weight: 700; font-family: 'Plus Jakarta Sans', sans-serif;
+  cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-purple);
+  letter-spacing: 0.2px;
+}
+.login-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(124,58,237,0.4); }
+.login-footer { text-align: center; margin-top: 20px; font-size: 12px; color: var(--grey-400); }
+
+/* ════════════════════════════════
+   APP LAYOUT
+════════════════════════════════ */
+#app { display: none; height: 100vh; }
+#app.visible { display: flex; animation: fadeIn 0.4s ease; }
+
+/* ════════════════════════════════
+   SIDEBAR
+════════════════════════════════ */
+.sidebar {
+  width: var(--sidebar-width); background: var(--sidebar);
+  display: flex; flex-direction: column; height: 100vh;
+  flex-shrink: 0; overflow: hidden; position: relative;
+}
+.sidebar::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 200px;
+  background: linear-gradient(180deg, rgba(124,58,237,0.08) 0%, transparent 100%);
+  pointer-events: none;
+}
+.sb-top { padding: 16px 14px 12px; border-bottom: 1px solid var(--sidebar-border); }
+.sb-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.sb-brand-icon {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-glow));
+  border-radius: 9px; display: flex; align-items: center; justify-content: center;
+  font-size: 14px; flex-shrink: 0; box-shadow: 0 4px 12px rgba(124,58,237,0.3);
+}
+.sb-brand-name { font-size: 15px; font-weight: 800; color: white; letter-spacing: -0.3px; }
+.sb-brand-sub { font-size: 10px; color: var(--sidebar-muted); font-weight: 400; }
+
+/* Project Selector */
+.proj-sel {
+  background: rgba(255,255,255,0.05); border: 1px solid var(--sidebar-border);
+  border-radius: var(--radius-sm); padding: 9px 12px; cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between;
+  transition: all 0.2s; margin-bottom: 8px;
+}
+.proj-sel:hover { background: rgba(255,255,255,0.08); border-color: rgba(124,58,237,0.3); }
+.proj-sel-left { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.proj-color-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; background: var(--primary-glow); }
+.proj-sel-name { font-size: 12px; font-weight: 600; color: var(--sidebar-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.proj-sel-client { font-size: 10px; color: var(--sidebar-muted); }
+.proj-arrow { color: var(--sidebar-muted); font-size: 10px; transition: transform 0.2s; flex-shrink: 0; }
+.proj-arrow.open { transform: rotate(180deg); }
+
+/* Project Dropdown */
+.proj-dd {
+  background: #1A1A35; border: 1px solid var(--sidebar-border);
+  border-radius: var(--radius-sm); margin-bottom: 8px;
+  overflow: hidden; display: none;
+}
+.proj-dd.open { display: block; animation: slideDown 0.2s ease; }
+.proj-dd-item {
+  padding: 9px 12px; cursor: pointer; display: flex; align-items: center;
+  gap: 10px; transition: all 0.15s; border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+.proj-dd-item:last-child { border-bottom: none; }
+.proj-dd-item:hover { background: var(--sidebar-hover); }
+.proj-dd-item.active { background: var(--sidebar-active); }
+.pdi-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.pdi-name { font-size: 12px; font-weight: 600; color: var(--sidebar-text); flex: 1; }
+.pdi-client { font-size: 10px; color: var(--sidebar-muted); }
+.pdi-check { color: var(--primary-glow); font-size: 11px; }
+.add-proj-row {
+  padding: 9px 12px; cursor: pointer; display: flex; align-items: center;
+  gap: 8px; color: var(--primary-glow); font-size: 12px; font-weight: 600;
+  transition: all 0.15s; border-top: 1px solid var(--sidebar-border);
+}
+.add-proj-row:hover { background: rgba(124,58,237,0.1); }
+
+/* Sidebar Actions */
+.sb-actions { display: flex; gap: 6px; }
+.new-chat-btn {
+  flex: 1; padding: 8px 10px;
+  background: rgba(124,58,237,0.15); border: 1px solid rgba(124,58,237,0.3);
+  border-radius: var(--radius-sm); color: var(--primary-glow);
+  font-size: 12px; font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 600; cursor: pointer; display: flex; align-items: center;
+  gap: 6px; transition: all 0.2s;
+}
+.new-chat-btn:hover { background: rgba(124,58,237,0.25); }
+.sb-icon-btn {
+  width: 32px; height: 32px;
+  background: rgba(255,255,255,0.05); border: 1px solid var(--sidebar-border);
+  border-radius: var(--radius-sm); display: flex; align-items: center;
+  justify-content: center; cursor: pointer; transition: all 0.2s;
+  color: var(--sidebar-muted); font-size: 13px; flex-shrink: 0;
+}
+.sb-icon-btn:hover { background: rgba(255,255,255,0.1); color: white; }
+
+/* Chat History */
+.sb-section { font-size: 10px; font-weight: 700; color: var(--sidebar-muted); letter-spacing: 1.2px; text-transform: uppercase; padding: 10px 14px 5px; }
+.chat-hist { flex: 1; overflow-y: auto; padding: 0 6px; }
+.chat-hist::-webkit-scrollbar { width: 3px; }
+.chat-hist::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; }
+.hist-item {
+  padding: 8px 8px; border-radius: var(--radius-sm); cursor: pointer;
+  transition: all 0.15s; margin-bottom: 1px; display: flex;
+  align-items: center; gap: 7px;
+}
+.hist-item:hover { background: var(--sidebar-hover); }
+.hist-item.active { background: var(--sidebar-active); }
+.hist-icon { font-size: 11px; flex-shrink: 0; opacity: 0.5; }
+.hist-text { font-size: 12px; color: var(--sidebar-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
+.hist-item.active .hist-text { color: white; }
+.hist-acts { display: none; gap: 2px; flex-shrink: 0; }
+.hist-item:hover .hist-acts { display: flex; }
+.ha { width: 20px; height: 20px; background: rgba(255,255,255,0.06); border: none; border-radius: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--sidebar-muted); font-size: 9px; transition: all 0.15s; }
+.ha:hover { background: rgba(255,255,255,0.12); color: white; }
+.ha.del:hover { background: rgba(239,68,68,0.3); color: #FCA5A5; }
+.no-hist { padding: 20px 10px; text-align: center; font-size: 11px; color: var(--sidebar-muted); line-height: 2; }
+
+/* Sidebar Footer */
+.sb-footer { padding: 10px; border-top: 1px solid var(--sidebar-border); }
+.sb-foot-btns { display: flex; gap: 5px; margin-bottom: 8px; }
+.sb-foot-btn {
+  flex: 1; padding: 7px 6px; border-radius: var(--radius-sm);
+  font-size: 10px; font-weight: 700; font-family: 'Plus Jakarta Sans', sans-serif;
+  cursor: pointer; border: none; display: flex; align-items: center;
+  justify-content: center; gap: 4px; transition: all 0.2s;
+}
+.upgrade-foot { background: linear-gradient(135deg, var(--primary), var(--primary-glow)); color: white; box-shadow: 0 3px 10px rgba(124,58,237,0.3); }
+.upgrade-foot:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(124,58,237,0.4); }
+.odoo-foot { background: rgba(6,182,212,0.1); border: 1px solid rgba(6,182,212,0.25) !important; color: var(--accent); }
+.odoo-foot:hover { background: rgba(6,182,212,0.2); }
+.user-row { display: flex; align-items: center; gap: 9px; padding: 8px; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.2s; }
+.user-row:hover { background: var(--sidebar-hover); }
+.user-av { width: 30px; height: 30px; background: linear-gradient(135deg, var(--primary), var(--primary-glow)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: white; flex-shrink: 0; }
+.user-info { flex: 1; overflow: hidden; }
+.user-nm { font-size: 12px; font-weight: 600; color: var(--sidebar-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-pl { font-size: 10px; color: var(--sidebar-muted); }
+.user-acts { display: flex; gap: 3px; }
+.u-act { width: 24px; height: 24px; background: none; border: none; border-radius: 5px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--sidebar-muted); font-size: 12px; transition: all 0.2s; }
+.u-act:hover { color: white; background: rgba(255,255,255,0.08); }
+
+/* ════════════════════════════════
+   MAIN AREA
+════════════════════════════════ */
+.main { flex: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; background: var(--bg); }
+
+/* Header */
+.hdr {
+  padding: 12px 20px; border-bottom: 1px solid var(--grey-200);
+  display: flex; align-items: center; justify-content: space-between;
+  background: white; flex-shrink: 0; gap: 10px;
+  box-shadow: 0 1px 0 var(--grey-100);
+}
+.hdr-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.hdr-title { font-size: 14px; font-weight: 700; color: var(--grey-900); letter-spacing: -0.3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
+.hdr-sub { font-size: 11px; color: var(--grey-400); }
+.hdr-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+
+/* Credit Badge */
+.credit-badge {
+  display: flex; align-items: center; gap: 5px;
+  padding: 6px 12px; border-radius: 100px; cursor: pointer;
+  background: var(--primary-light); border: 1.5px solid rgba(124,58,237,0.2);
+  transition: all 0.2s;
+}
+.credit-badge:hover { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(124,58,237,0.1); }
+.credit-badge.low { background: var(--orange-light); border-color: rgba(245,158,11,0.3); }
+.credit-badge.critical { background: var(--red-light); border-color: rgba(239,68,68,0.3); animation: glow 1.5s infinite; }
+.credit-badge.pop { animation: creditPop 0.3s ease; }
+.cr-icon { font-size: 12px; }
+.cr-count { font-size: 12px; font-weight: 800; color: var(--primary); font-family: 'JetBrains Mono', monospace; }
+.credit-badge.low .cr-count { color: var(--orange); }
+.credit-badge.critical .cr-count { color: var(--red); }
+.cr-label { font-size: 10px; color: var(--grey-400); font-weight: 500; }
+
+/* Header Buttons */
+.hdr-btn {
+  display: flex; align-items: center; gap: 5px; padding: 7px 12px;
+  border-radius: var(--radius-sm); font-size: 11px; font-weight: 700;
+  font-family: 'Plus Jakarta Sans', sans-serif; cursor: pointer;
+  transition: all 0.2s; border: 1.5px solid transparent;
+}
+.btn-new-proj { background: rgba(124,58,237,0.07); border-color: rgba(124,58,237,0.2); color: var(--primary); }
+.btn-new-proj:hover { background: rgba(124,58,237,0.12); }
+.btn-odoo { background: rgba(6,182,212,0.07); border-color: rgba(6,182,212,0.2); color: var(--accent); }
+.btn-odoo:hover { background: rgba(6,182,212,0.12); }
+.btn-upgrade { background: linear-gradient(135deg, var(--primary), var(--primary-glow)); color: white; box-shadow: var(--shadow-purple); }
+.btn-upgrade:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(124,58,237,0.4); }
+.status-pill { display: flex; align-items: center; gap: 5px; padding: 5px 11px; background: var(--green-light); border-radius: 100px; font-size: 11px; font-weight: 700; color: #065F46; }
+.status-dot { width: 6px; height: 6px; background: var(--green); border-radius: 50%; animation: pulse 2s infinite; }
+
+/* ════════════════════════════════
+   MESSAGES
+════════════════════════════════ */
+.msgs-area { flex: 1; overflow-y: auto; padding: 24px 0; scroll-behavior: smooth; }
+.msgs-area::-webkit-scrollbar { width: 5px; }
+.msgs-area::-webkit-scrollbar-thumb { background: var(--grey-200); border-radius: 4px; }
+
+/* Welcome Screen */
+.welcome {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; height: 100%; padding: 40px 28px; text-align: center;
+}
+.welcome-icon {
+  width: 68px; height: 68px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-glow));
+  border-radius: 20px; display: flex; align-items: center; justify-content: center;
+  font-size: 30px; margin-bottom: 20px; box-shadow: var(--shadow-purple);
+}
+.welcome-title { font-size: 24px; font-weight: 800; color: var(--grey-900); letter-spacing: -0.5px; margin-bottom: 10px; }
+.welcome-sub { font-size: 14px; color: var(--grey-400); max-width: 400px; line-height: 1.7; margin-bottom: 32px; }
+.sug-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-width: 560px; width: 100%; }
+.sug-card {
+  background: white; border: 1.5px solid var(--grey-200); border-radius: var(--radius);
+  padding: 14px 16px; cursor: pointer; text-align: left; transition: all 0.2s;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.sug-card:hover { border-color: var(--primary); background: var(--primary-light); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.sug-em { font-size: 20px; margin-bottom: 6px; }
+.sug-t { font-size: 12px; font-weight: 700; color: var(--grey-800); margin-bottom: 3px; }
+.sug-d { font-size: 11px; color: var(--grey-400); line-height: 1.5; }
+
+/* Message Row */
+.msg-row {
+  padding: 6px 24px; display: flex; gap: 12px; align-items: flex-start;
+  animation: slideInUp 0.3s ease; max-width: 860px; margin: 0 auto; width: 100%;
+}
+.msg-row.user { flex-direction: row-reverse; }
+.msg-av {
+  width: 30px; height: 30px; border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; flex-shrink: 0; font-weight: 700;
+}
+.msg-av.ai { background: linear-gradient(135deg, var(--primary), var(--primary-glow)); color: white; font-size: 14px; }
+.msg-av.user { background: var(--grey-100); color: var(--grey-600); }
+.msg-body { flex: 1; }
+.msg-sender { font-size: 11px; font-weight: 700; color: var(--grey-400); margin-bottom: 5px; letter-spacing: 0.2px; }
+.msg-row.user .msg-sender { text-align: right; }
+.msg-bubble { display: inline-block; padding: 12px 16px; border-radius: 14px; font-size: 13px; line-height: 1.75; max-width: 100%; }
+.msg-row.ai .msg-bubble { background: white; border: 1.5px solid var(--grey-200); color: var(--grey-800); border-radius: 4px 14px 14px 14px; box-shadow: var(--shadow); }
+.msg-row.user .msg-bubble { background: linear-gradient(135deg, var(--primary), var(--primary-glow)); color: white; border-radius: 14px 4px 14px 14px; float: right; box-shadow: var(--shadow-purple); }
+.msg-time { font-size: 10px; color: var(--grey-300); margin-top: 5px; font-family: 'JetBrains Mono', monospace; }
+.msg-row.user .msg-time { text-align: right; }
+.msg-credit { display: inline-flex; align-items: center; gap: 4px; background: var(--orange-light); border: 1px solid rgba(245,158,11,0.2); border-radius: 100px; padding: 2px 8px; font-size: 10px; color: var(--orange); font-weight: 700; margin-top: 5px; font-family: 'JetBrains Mono', monospace; }
+
+/* Clarification Warning */
+.clarify-box {
+  background: linear-gradient(135deg, rgba(124,58,237,0.05), rgba(6,182,212,0.05));
+  border: 1.5px solid rgba(124,58,237,0.2); border-radius: var(--radius);
+  padding: 12px 14px; margin-top: 10px; font-size: 12px; color: var(--grey-700);
+}
+.clarify-box strong { color: var(--primary); }
+
+/* Typing */
+.typing-ind { display: flex; gap: 5px; padding: 12px 16px; background: white; border: 1.5px solid var(--grey-200); border-radius: 4px 14px 14px 14px; width: fit-content; box-shadow: var(--shadow); }
+.t-dot { width: 6px; height: 6px; background: var(--grey-300); border-radius: 50%; animation: bounce 1.4s infinite; }
+.t-dot:nth-child(2) { animation-delay: 0.2s; }
+.t-dot:nth-child(3) { animation-delay: 0.4s; }
+
+/* ════════════════════════════════
+   INPUT AREA
+════════════════════════════════ */
+.input-area { padding: 14px 20px 18px; background: white; border-top: 1px solid var(--grey-200); flex-shrink: 0; }
+.input-wrap { max-width: 800px; margin: 0 auto; }
+.input-box-wrap { background: var(--grey-50); border: 2px solid var(--grey-200); border-radius: 18px; transition: all 0.2s; }
+.input-box-wrap:focus-within { border-color: var(--primary); background: white; box-shadow: 0 0 0 4px rgba(124,58,237,0.08); }
+.attach-strip { display: none; flex-wrap: wrap; gap: 6px; padding: 10px 14px 0; }
+.attach-chip { display: flex; align-items: center; gap: 6px; background: var(--primary-light); border: 1px solid rgba(124,58,237,0.2); border-radius: 100px; padding: 4px 10px; font-size: 11px; color: var(--primary); font-weight: 600; }
+.attach-chip button { background: none; border: none; cursor: pointer; color: var(--primary); font-size: 13px; line-height: 1; padding: 0; }
+.input-ta { width: 100%; background: transparent; border: none; padding: 13px 16px; font-size: 13px; font-family: 'Plus Jakarta Sans', sans-serif; color: var(--grey-800); resize: none; outline: none; min-height: 50px; max-height: 140px; line-height: 1.6; overflow-y: auto; }
+.input-ta::placeholder { color: var(--grey-300); }
+.input-tb { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border-top: 1px solid var(--grey-100); }
+.input-tools { display: flex; gap: 4px; }
+.tool-btn { width: 30px; height: 30px; background: none; border: none; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--grey-400); font-size: 14px; transition: all 0.2s; position: relative; }
+.tool-btn:hover { background: var(--grey-100); color: var(--primary); }
+.tool-tip { position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); background: var(--grey-800); color: white; font-size: 10px; padding: 4px 8px; border-radius: 5px; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.15s; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 600; }
+.tool-btn:hover .tool-tip { opacity: 1; }
+.send-btn { width: 34px; height: 34px; background: linear-gradient(135deg, var(--primary), var(--primary-glow)); border: none; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; box-shadow: var(--shadow-purple); }
+.send-btn:hover { transform: scale(1.05); }
+.send-btn:disabled { background: var(--grey-200); box-shadow: none; cursor: not-allowed; transform: none; }
+.input-foot { text-align: center; font-size: 10px; color: var(--grey-300); margin-top: 7px; }
+#file-input { display: none; }
+
+/* ════════════════════════════════
+   MODALS
+════════════════════════════════ */
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); z-index: 500; display: none; align-items: center; justify-content: center; padding: 20px; }
+.overlay.open { display: flex; animation: fadeIn 0.2s ease; }
+.modal { background: white; border-radius: 20px; box-shadow: var(--shadow-lg); width: 100%; max-height: 90vh; overflow: hidden; animation: slideUp 0.3s cubic-bezier(0.34,1.56,0.64,1); }
+.modal-hdr { padding: 18px 22px; border-bottom: 1px solid var(--grey-100); display: flex; align-items: center; justify-content: space-between; }
+.modal-title { font-size: 16px; font-weight: 800; color: var(--grey-900); letter-spacing: -0.3px; }
+.modal-x { width: 28px; height: 28px; background: var(--grey-100); border: none; border-radius: 50%; cursor: pointer; font-size: 12px; color: var(--grey-600); display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+.modal-x:hover { background: var(--grey-200); }
+.modal-body { padding: 22px; overflow-y: auto; max-height: calc(90vh - 130px); }
+.modal-foot { padding: 16px 22px; border-top: 1px solid var(--grey-100); display: flex; justify-content: flex-end; gap: 10px; }
+
+/* Form */
+.frow { margin-bottom: 14px; }
+.frow label { display: block; font-size: 11px; font-weight: 700; color: var(--grey-600); margin-bottom: 7px; text-transform: uppercase; letter-spacing: 0.4px; }
+.frow input, .frow select, .frow textarea { width: 100%; padding: 10px 13px; border: 1.5px solid var(--grey-200); border-radius: var(--radius-sm); font-size: 13px; font-family: 'Plus Jakarta Sans', sans-serif; color: var(--grey-800); outline: none; transition: all 0.2s; background: var(--grey-50); }
+.frow input:focus, .frow select:focus, .frow textarea:focus { border-color: var(--primary); background: white; box-shadow: 0 0 0 3px rgba(124,58,237,0.08); }
+.btn-primary { padding: 10px 20px; background: linear-gradient(135deg, var(--primary), var(--primary-glow)); color: white; border: none; border-radius: var(--radius-sm); font-size: 13px; font-weight: 700; font-family: 'Plus Jakarta Sans', sans-serif; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-purple); }
+.btn-primary:hover { transform: translateY(-1px); }
+.btn-secondary { padding: 10px 20px; background: var(--grey-100); color: var(--grey-700); border: none; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; font-family: 'Plus Jakarta Sans', sans-serif; cursor: pointer; transition: all 0.2s; }
+.btn-secondary:hover { background: var(--grey-200); }
+.color-dots { display: flex; gap: 8px; flex-wrap: wrap; }
+.cdot { width: 26px; height: 26px; border-radius: 50%; cursor: pointer; transition: all 0.15s; border: 3px solid transparent; }
+.cdot.sel { border-color: var(--grey-800); transform: scale(1.15); }
+.cdot:hover { transform: scale(1.1); }
+
+/* Settings Modal */
+.settings-modal { max-width: 780px; max-height: 88vh; display: flex; flex-direction: column; }
+.settings-body { display: flex; flex: 1; overflow: hidden; }
+.settings-nav { width: 168px; background: var(--grey-50); border-right: 1px solid var(--grey-100); padding: 12px 8px; flex-shrink: 0; }
+.sn-item { padding: 9px 12px; border-radius: var(--radius-sm); cursor: pointer; display: flex; align-items: center; gap: 9px; font-size: 12px; font-weight: 600; color: var(--grey-600); transition: all 0.15s; margin-bottom: 3px; }
+.sn-item:hover { background: var(--grey-200); color: var(--grey-800); }
+.sn-item.active { background: var(--primary-light); color: var(--primary); }
+.sn-icon { font-size: 14px; }
+.settings-content { flex: 1; overflow-y: auto; padding: 24px; }
+.s-section { display: none; }
+.s-section.active { display: block; animation: fadeIn 0.2s ease; }
+.s-section h2 { font-size: 17px; font-weight: 800; color: var(--grey-900); margin-bottom: 4px; letter-spacing: -0.3px; }
+.s-section > p { font-size: 12px; color: var(--grey-400); margin-bottom: 20px; }
+.sub-tabs { display: flex; gap: 4px; margin-bottom: 20px; background: var(--grey-100); border-radius: var(--radius-sm); padding: 4px; }
+.stab { padding: 7px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; color: var(--grey-500); transition: all 0.15s; }
+.stab.active { background: white; color: var(--primary); box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+.stab-content { display: none; }
+.stab-content.active { display: block; animation: fadeIn 0.2s ease; }
+.save-btn { padding: 10px 22px; background: linear-gradient(135deg, var(--primary), var(--primary-glow)); color: white; border: none; border-radius: var(--radius-sm); font-size: 13px; font-weight: 700; font-family: 'Plus Jakarta Sans', sans-serif; cursor: pointer; margin-top: 8px; box-shadow: var(--shadow-purple); transition: all 0.2s; }
+.save-btn:hover { transform: translateY(-1px); }
+
+/* Knowledge Base Section */
+.kb-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border: 1.5px solid var(--grey-200); border-radius: var(--radius-sm); margin-bottom: 8px; transition: all 0.2s; }
+.kb-item:hover { border-color: var(--primary); background: var(--primary-light); }
+.kb-left { display: flex; align-items: center; gap: 10px; }
+.kb-icon { font-size: 20px; }
+.kb-name { font-size: 13px; font-weight: 600; color: var(--grey-800); }
+.kb-size { font-size: 11px; color: var(--grey-400); }
+.kb-status { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 100px; }
+.kb-status.ready { background: var(--green-light); color: #065F46; }
+.kb-status.processing { background: var(--orange-light); color: #92400E; }
+.kb-del { background: none; border: none; cursor: pointer; color: var(--grey-300); font-size: 14px; padding: 4px; border-radius: 5px; transition: all 0.2s; }
+.kb-del:hover { color: var(--red); background: var(--red-light); }
+.upload-zone { border: 2px dashed var(--grey-300); border-radius: var(--radius); padding: 28px; text-align: center; cursor: pointer; transition: all 0.2s; margin-bottom: 14px; }
+.upload-zone:hover { border-color: var(--primary); background: var(--primary-light); }
+.upload-zone-icon { font-size: 32px; margin-bottom: 10px; }
+.upload-zone-title { font-size: 14px; font-weight: 700; color: var(--grey-700); margin-bottom: 4px; }
+.upload-zone-sub { font-size: 12px; color: var(--grey-400); }
+.url-input-row { display: flex; gap: 8px; margin-bottom: 14px; }
+.url-input-row input { flex: 1; }
+
+/* Plan Cards */
+.plans { display: flex; flex-direction: column; gap: 12px; }
+.plan { border: 2px solid var(--grey-200); border-radius: var(--radius); padding: 18px; position: relative; transition: all 0.2s; }
+.plan:hover { border-color: var(--primary); }
+.plan.pop { border-color: var(--primary); background: var(--primary-light); }
+.pop-badge { position: absolute; top: -10px; left: 16px; background: linear-gradient(135deg, var(--primary), var(--primary-glow)); color: white; font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 100px; }
+.plan-name { font-size: 15px; font-weight: 800; color: var(--grey-900); margin-bottom: 4px; }
+.plan-price { font-size: 22px; font-weight: 800; color: var(--primary); margin-bottom: 10px; }
+.plan-price span { font-size: 12px; color: var(--grey-400); font-weight: 400; }
+.plan-feats { list-style: none; margin-bottom: 14px; }
+.plan-feats li { font-size: 12px; color: var(--grey-600); padding: 3px 0; display: flex; align-items: center; gap: 7px; }
+.plan-feats li::before { content: '✓'; color: var(--green); font-weight: 800; flex-shrink: 0; }
+.plan-btn { width: 100%; padding: 10px; background: linear-gradient(135deg, var(--primary), var(--primary-glow)); color: white; border: none; border-radius: var(--radius-sm); font-size: 13px; font-weight: 700; font-family: 'Plus Jakarta Sans', sans-serif; cursor: pointer; transition: all 0.2s; }
+.plan-btn:hover { transform: translateY(-1px); }
+
+/* Affiliate */
+.aff-card { background: linear-gradient(135deg, var(--primary-dark), var(--primary)); border-radius: var(--radius); padding: 20px; color: white; margin-bottom: 16px; }
+.aff-card h3 { font-size: 15px; font-weight: 800; margin-bottom: 8px; }
+.aff-card p { font-size: 12px; opacity: 0.75; margin-bottom: 14px; line-height: 1.6; }
+.aff-code { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.1); border-radius: var(--radius-sm); padding: 10px 14px; }
+.aff-code span { font-size: 13px; font-family: 'JetBrains Mono', monospace; flex: 1; }
+.copy-btn { padding: 6px 14px; background: white; color: var(--primary); border: none; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s; font-family: 'Plus Jakarta Sans', sans-serif; }
+.copy-btn:hover { transform: scale(1.05); }
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.stat-box { background: var(--grey-50); border: 1.5px solid var(--grey-200); border-radius: var(--radius); padding: 14px; text-align: center; }
+.stat-val { font-size: 20px; font-weight: 800; }
+.stat-lbl { font-size: 11px; color: var(--grey-400); margin-top: 3px; }
+
+/* Feature Toggle */
+.feat-row { display: flex; align-items: center; justify-content: space-between; padding: 14px; border: 1.5px solid var(--grey-200); border-radius: var(--radius-sm); margin-bottom: 10px; }
+.feat-info .feat-t { font-size: 13px; font-weight: 700; color: var(--grey-800); }
+.feat-info .feat-d { font-size: 11px; color: var(--grey-400); margin-top: 2px; }
+.toggle { width: 40px; height: 22px; border-radius: 100px; cursor: pointer; transition: background 0.2s; position: relative; flex-shrink: 0; }
+.toggle .thumb { width: 18px; height: 18px; background: white; border-radius: 50%; position: absolute; top: 2px; transition: left 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+.toggle.on { background: var(--primary); }
+.toggle.off { background: var(--grey-200); }
+.toggle.on .thumb { left: 20px; }
+.toggle.off .thumb { left: 2px; }
+
+/* GitHub */
+.gh-connect { text-align: center; padding: 20px 0 10px; }
+.gh-icon { font-size: 48px; margin-bottom: 12px; }
+.gh-status { font-size: 14px; font-weight: 700; margin-bottom: 16px; }
+.gh-status.ok { color: var(--green); }
+.gh-status.no { color: var(--grey-400); }
+.gh-btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 22px; background: var(--grey-900); color: white; border: none; border-radius: var(--radius-sm); font-size: 13px; font-weight: 700; font-family: 'Plus Jakarta Sans', sans-serif; cursor: pointer; transition: all 0.2s; }
+.gh-btn:hover { background: black; transform: translateY(-1px); }
+.repo-list { margin-top: 16px; }
+.repo-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border: 1.5px solid var(--grey-200); border-radius: var(--radius-sm); margin-bottom: 8px; }
+.repo-nm { font-size: 13px; font-weight: 700; color: var(--grey-800); }
+.repo-br { font-size: 11px; color: var(--grey-400); }
+.deploy-btn { padding: 7px 14px; background: var(--primary-light); color: var(--primary); border: 1px solid rgba(124,58,237,0.3); border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.2s; }
+.deploy-btn:hover { background: var(--primary); color: white; }
+
+/* Context Menu */
+.ctx { position: fixed; background: white; border: 1.5px solid var(--grey-200); border-radius: var(--radius-sm); box-shadow: var(--shadow-lg); z-index: 1000; min-width: 160px; overflow: hidden; animation: slideDown 0.15s ease; }
+.ctx-item { padding: 10px 14px; font-size: 12px; font-weight: 600; color: var(--grey-700); cursor: pointer; display: flex; align-items: center; gap: 9px; transition: all 0.1s; }
+.ctx-item:hover { background: var(--grey-50); }
+.ctx-item.danger { color: var(--red); }
+.ctx-item.danger:hover { background: var(--red-light); }
+
+/* Toast */
+.toast { position: fixed; bottom: 24px; right: 24px; background: var(--grey-900); color: white; padding: 11px 18px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; box-shadow: var(--shadow-lg); z-index: 2000; animation: slideUp 0.3s ease; }
+
+/* Profile */
+.profile-av-area { display: flex; align-items: center; gap: 14px; background: var(--grey-50); border-radius: var(--radius); padding: 16px; margin-bottom: 16px; border: 1.5px solid var(--grey-200); }
+.pav-big { width: 52px; height: 52px; background: linear-gradient(135deg, var(--primary), var(--primary-glow)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; color: white; flex-shrink: 0; }
+.pav-nm { font-size: 15px; font-weight: 800; color: var(--grey-900); }
+.pav-em { font-size: 12px; color: var(--grey-400); }
+.pav-edit { margin-left: auto; padding: 7px 14px; background: var(--primary-light); color: var(--primary); border: none; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; }
+
+/* Plan banner */
+.plan-banner { background: linear-gradient(135deg, var(--primary), var(--primary-glow)); border-radius: var(--radius); padding: 18px; color: white; margin-bottom: 16px; }
+.pb-lbl { font-size: 11px; opacity: 0.7; margin-bottom: 2px; }
+.pb-nm { font-size: 20px; font-weight: 800; margin-bottom: 2px; }
+.pb-det { font-size: 12px; opacity: 0.7; }
+.credit-bar-wrap { margin-bottom: 14px; }
+.cb-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.cb-lbl { font-size: 12px; font-weight: 600; color: var(--grey-600); }
+.cb-val { font-size: 12px; font-family: 'JetBrains Mono', monospace; color: var(--primary); font-weight: 700; }
+.cb-track { height: 8px; background: var(--grey-100); border-radius: 100px; overflow: hidden; }
+.cb-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--primary-glow)); border-radius: 100px; transition: width 0.5s; }
+
+/* Linked accounts */
+.linked-row { display: flex; align-items: center; justify-content: space-between; padding: 13px; border: 1.5px solid var(--grey-200); border-radius: var(--radius-sm); margin-bottom: 10px; }
+.linked-l { display: flex; align-items: center; gap: 10px; }
+.linked-logo { font-size: 20px; }
+.linked-nm { font-size: 13px; font-weight: 700; color: var(--grey-800); }
+.linked-st { font-size: 11px; color: var(--grey-400); }
+.linked-st.ok { color: var(--green); }
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══ -->
+<div id="login-page">
+  <div class="login-mesh"></div>
+  <div class="login-grid"></div>
+  <div class="login-card">
+    <div class="login-brand">
+      <div class="brand-icon">🤖</div>
+      <div>
+        <div class="brand-name">OdooXYZ</div>
+        <div class="brand-tag">AI-Powered Odoo Implementation Platform</div>
+      </div>
+    </div>
+    <div class="login-heading">Welcome back 👋</div>
+    <div class="login-sub">Sign in to your AI implementation workspace and start automating Odoo.</div>
+    <div class="field">
+      <label>Email Address</label>
+      <input type="email" id="l-email" placeholder="you@company.com" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="l-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="login-btn" onclick="doLogin()">Sign In to OdooXYZ →</button>
+    <div class="login-footer">New here? Contact us to get your account set up.</div>
+  </div>
+</div>
+
+<!-- ══ APP ══ -->
+<div id="app">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sb-top">
+      <div class="sb-brand">
+        <div class="sb-brand-icon">🤖</div>
+        <div>
+          <div class="sb-brand-name">OdooXYZ</div>
+          <div class="sb-brand-sub">AI Implementation Platform</div>
+        </div>
+      </div>
+
+      <!-- Project Selector -->
+      <div class="proj-sel" onclick="toggleProjDD()">
+        <div class="proj-sel-left">
+          <div class="proj-color-dot" id="cur-proj-dot"></div>
+          <div style="min-width:0;">
+            <div class="proj-sel-name" id="cur-proj-name">Select Project</div>
+            <div class="proj-sel-client" id="cur-proj-client">No project selected</div>
+          </div>
+        </div>
+        <span class="proj-arrow" id="proj-arrow">▾</span>
+      </div>
+      <div class="proj-dd" id="proj-dd">
+        <div id="proj-dd-list"></div>
+        <div class="add-proj-row" onclick="openNewProj()">＋ Add Client Project</div>
+      </div>
+
+      <!-- Actions -->
+      <div class="sb-actions">
+        <button class="new-chat-btn" onclick="newChat()">✦ New Chat</button>
+        <div class="sb-icon-btn" onclick="openNewProj()" title="Add Project">📁</div>
+        <div class="sb-icon-btn" onclick="openModal('gh-modal')" title="GitHub">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="sb-section">Conversations</div>
+    <div class="chat-hist" id="chat-hist">
+      <div class="no-hist">No conversations yet.<br>Start a new chat above.</div>
+    </div>
+
+    <div class="sb-footer">
+      <div class="sb-foot-btns">
+        <button class="sb-foot-btn upgrade-foot" onclick="openSettings('billing')">⚡ Upgrade</button>
+        <button class="sb-foot-btn odoo-foot" onclick="openOdoo()">🔗 Open Odoo</button>
+      </div>
+      <div class="user-row">
+        <div class="user-av" id="sb-av">U</div>
+        <div class="user-info">
+          <div class="user-nm" id="sb-nm">User</div>
+          <div class="user-pl">Starter Plan</div>
+        </div>
+        <div class="user-acts">
+          <div class="u-act" onclick="openSettings('profile')" title="Settings">⚙</div>
+          <div class="u-act" onclick="doLogout()" title="Logout">⏻</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="hdr">
+      <div class="hdr-left">
+        <div>
+          <div class="hdr-title" id="hdr-title">New Chat</div>
+          <div class="hdr-sub" id="hdr-sub">Select a project to get started</div>
+        </div>
+      </div>
+      <div class="hdr-right">
+        <div class="credit-badge" id="cr-badge" onclick="openSettings('billing')">
+          <span class="cr-icon">⚡</span>
+          <span class="cr-count" id="cr-count">1,000</span>
+          <span class="cr-label">credits</span>
+        </div>
+        <button class="hdr-btn btn-new-proj" onclick="openNewProj()">＋ Project</button>
+        <button class="hdr-btn btn-odoo" onclick="openOdoo()">🔗 Open Odoo</button>
+        <button class="hdr-btn btn-upgrade" onclick="openSettings('billing')">⚡ Upgrade</button>
+        <div class="status-pill"><div class="status-dot"></div>Live</div>
+      </div>
+    </div>
+
+    <div class="msgs-area" id="msgs-area">
+      <div class="welcome" id="welcome">
+        <div class="welcome-icon">🤖</div>
+        <div class="welcome-title">What shall we implement today?</div>
+        <div class="welcome-sub">I'll always ask the right questions before doing anything. Select a project from the sidebar and describe your requirement.</div>
+        <div class="sug-grid">
+          <button class="sug-card" onclick="useSug('I want to create some customers in Odoo')"><div class="sug-em">👥</div><div class="sug-t">Create Customers</div><div class="sug-d">Add customers to Odoo automatically</div></button>
+          <button class="sug-card" onclick="useSug('I want to set up products with prices')"><div class="sug-em">📦</div><div class="sug-t">Setup Products</div><div class="sug-d">Create product catalogue with pricing</div></button>
+          <button class="sug-card" onclick="useSug('I want to configure payment terms')"><div class="sug-em">💳</div><div class="sug-t">Payment Terms</div><div class="sug-d">Set up payment and pricelist configs</div></button>
+          <button class="sug-card" onclick="useSug('I want to create a sales order')"><div class="sug-em">🧾</div><div class="sug-t">Sales Orders</div><div class="sug-d">Create and configure sales orders</div></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="input-area">
+      <div class="input-wrap">
+        <div class="input-box-wrap">
+          <div class="attach-strip" id="attach-strip"></div>
+          <textarea class="input-ta" id="msg-input" placeholder="Describe your Odoo requirement… I'll ask clarifying questions before implementing anything." rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+          <div class="input-tb">
+            <div class="input-tools">
+              <button class="tool-btn" onclick="document.getElementById('file-input').click()">📎<span class="tool-tip">Attach File / PDF</span></button>
+              <button class="tool-btn" onclick="openModal('gh-modal')">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" opacity="0.5"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                <span class="tool-tip">GitHub Deploy</span>
+              </button>
+              <button class="tool-btn" onclick="clearInput()">🗑<span class="tool-tip">Clear</span></button>
+            </div>
+            <button class="send-btn" id="send-btn" onclick="sendMsg()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </button>
+          </div>
+        </div>
+        <input type="file" id="file-input" multiple accept=".pdf,.doc,.docx,.txt,.xlsx,.csv,.py,.xml" onchange="handleFiles(event)">
+        <div class="input-foot">OdooXYZ always asks clarifying questions before implementing • Staging database only • Enter to send</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODALS ══ -->
+
+<!-- New Project -->
+<div class="overlay" id="proj-modal">
+  <div class="modal" style="max-width:500px;">
+    <div class="modal-hdr"><div class="modal-title">Add Client Project</div><button class="modal-x" onclick="closeModal('proj-modal')">✕</button></div>
+    <div class="modal-body">
+      <div class="frow"><label>Client / Company Name</label><input type="text" id="p-client" placeholder="e.g. ABC Pvt Ltd"></div>
+      <div class="frow"><label>Project Name</label><input type="text" id="p-name" placeholder="e.g. Odoo Go-Live Phase 1"></div>
+      <div class="frow"><label>Odoo URL</label><input type="text" id="p-url" placeholder="https://client.odoo.com"></div>
+      <div class="frow"><label>Database Name</label><input type="text" id="p-db" placeholder="client-database-name"></div>
+      <div class="frow"><label>Login Email</label><input type="email" id="p-login" placeholder="admin@client.com"></div>
+      <div class="frow"><label>Password</label><input type="password" id="p-pass" placeholder="••••••••"></div>
+      <div class="frow">
+        <label>Project Color</label>
+        <div class="color-dots">
+          <div class="cdot sel" style="background:#7C3AED" data-c="#7C3AED" onclick="selColor(this)"></div>
+          <div class="cdot" style="background:#06B6D4" data-c="#06B6D4" onclick="selColor(this)"></div>
+          <div class="cdot" style="background:#10B981" data-c="#10B981" onclick="selColor(this)"></div>
+          <div class="cdot" style="background:#F59E0B" data-c="#F59E0B" onclick="selColor(this)"></div>
+          <div class="cdot" style="background:#EF4444" data-c="#EF4444" onclick="selColor(this)"></div>
+          <div class="cdot" style="background:#EC4899" data-c="#EC4899" onclick="selColor(this)"></div>
+          <div class="cdot" style="background:#3B82F6" data-c="#3B82F6" onclick="selColor(this)"></div>
+          <div class="cdot" style="background:#14B8A6" data-c="#14B8A6" onclick="selColor(this)"></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-secondary" onclick="closeModal('proj-modal')">Cancel</button>
+      <button class="btn-primary" onclick="saveProj()">Create Project</button>
+    </div>
+  </div>
+</div>
+
+<!-- Settings -->
+<div class="overlay" id="settings-modal">
+  <div class="modal settings-modal">
+    <div class="modal-hdr" style="padding:18px 22px;border-bottom:1px solid var(--grey-100);flex-shrink:0;">
+      <div class="modal-title">Settings</div>
+      <button class="modal-x" onclick="closeModal('settings-modal')">✕</button>
+    </div>
+    <div class="settings-body">
+      <div class="settings-nav">
+        <div class="sn-item active" data-sec="profile" onclick="switchSec('profile')"><span class="sn-icon">👤</span>Profile</div>
+        <div class="sn-item" data-sec="projects" onclick="switchSec('projects')"><span class="sn-icon">📁</span>Projects</div>
+        <div class="sn-item" data-sec="knowledge" onclick="switchSec('knowledge')"><span class="sn-icon">🧠</span>Knowledge</div>
+        <div class="sn-item" data-sec="features" onclick="switchSec('features')"><span class="sn-icon">⚙️</span>Features</div>
+        <div class="sn-item" data-sec="billing" onclick="switchSec('billing')"><span class="sn-icon">💳</span>Billing</div>
+        <div class="sn-item" data-sec="affiliate" onclick="switchSec('affiliate')"><span class="sn-icon">🤝</span>Affiliate</div>
+      </div>
+      <div class="settings-content">
+
+        <!-- PROFILE -->
+        <div class="s-section active" id="sec-profile">
+          <h2>Profile Settings</h2><p>Manage your personal account settings.</p>
+          <div class="sub-tabs">
+            <div class="stab active" onclick="switchStab('profile','info')">Info</div>
+            <div class="stab" onclick="switchStab('profile','password')">Password</div>
+            <div class="stab" onclick="switchStab('profile','2fa')">Two Factor</div>
+            <div class="stab" onclick="switchStab('profile','linked')">Linked Accounts</div>
+            <div class="stab" onclick="switchStab('profile','subscription')">Subscription</div>
+          </div>
+          <div class="stab-content active" id="profile-info">
+            <div class="profile-av-area">
+              <div class="pav-big" id="pav-big">U</div>
+              <div><div class="pav-nm" id="pav-nm">User</div><div class="pav-em" id="pav-em">user@email.com</div></div>
+              <button class="pav-edit" onclick="toast('Photo upload coming soon')">Change Photo</button>
+            </div>
+            <div class="frow"><label>Full Name</label><input type="text" id="pf-name" placeholder="Your full name"></div>
+            <div class="frow"><label>Email</label><input type="email" id="pf-email" placeholder="your@email.com"></div>
+            <div class="frow"><label>Company</label><input type="text" placeholder="Your company name"></div>
+            <div class="frow"><label>Phone</label><input type="text" placeholder="+91 98765 43210"></div>
+            <button class="save-btn" onclick="saveProfile()">Save Changes</button>
+          </div>
+          <div class="stab-content" id="profile-password">
+            <div class="frow"><label>Current Password</label><input type="password" placeholder="••••••••"></div>
+            <div class="frow"><label>New Password</label><input type="password" placeholder="••••••••"></div>
+            <div class="frow"><label>Confirm New Password</label><input type="password" placeholder="••••••••"></div>
+            <button class="save-btn" onclick="toast('✅ Password updated')">Update Password</button>
+          </div>
+          <div class="stab-content" id="profile-2fa">
+            <div style="background:var(--grey-50);border-radius:var(--radius);padding:24px;text-align:center;border:1.5px solid var(--grey-200);">
+              <div style="font-size:40px;margin-bottom:12px;">🔐</div>
+              <div style="font-size:15px;font-weight:800;color:var(--grey-900);margin-bottom:8px;">Two-Factor Authentication</div>
+              <div style="font-size:12px;color:var(--grey-400);margin-bottom:16px;line-height:1.6;">Add an extra layer of security. You'll need your phone to log in.</div>
+              <button class="btn-primary" onclick="toast('2FA setup coming soon')">Enable 2FA</button>
+            </div>
+          </div>
+          <div class="stab-content" id="profile-linked">
+            <div class="linked-row">
+              <div class="linked-l"><div class="linked-logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="#333"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg></div><div><div class="linked-nm">GitHub</div><div class="linked-st" id="gh-link-st">Not connected</div></div></div>
+              <button class="btn-primary" onclick="openModal('gh-modal')">Connect</button>
+            </div>
+            <div class="linked-row">
+              <div class="linked-l"><div class="linked-logo">🔵</div><div><div class="linked-nm">Google</div><div class="linked-st ok">Connected</div></div></div>
+              <button class="btn-secondary">Disconnect</button>
+            </div>
+          </div>
+          <div class="stab-content" id="profile-subscription">
+            <div class="plan-banner">
+              <div class="pb-lbl">CURRENT PLAN</div>
+              <div class="pb-nm">Starter</div>
+              <div class="pb-det">1,000 credits/month · 3 projects · 1 user</div>
+            </div>
+            <div class="credit-bar-wrap">
+              <div class="cb-row"><span class="cb-lbl">Credits Used This Month</span><span class="cb-val" id="cb-val">0 / 1,000</span></div>
+              <div class="cb-track"><div class="cb-fill" id="cb-fill" style="width:0%"></div></div>
+            </div>
+            <button class="btn-primary" style="width:100%;" onclick="switchSec('billing')">View Plans & Upgrade →</button>
+          </div>
+        </div>
+
+        <!-- PROJECTS -->
+        <div class="s-section" id="sec-projects">
+          <h2>Projects</h2><p>Manage all your client Odoo projects.</p>
+          <div id="proj-settings-list" style="margin-bottom:14px;"></div>
+          <button class="btn-primary" onclick="closeModal('settings-modal');openNewProj()">＋ Add New Project</button>
+        </div>
+
+        <!-- KNOWLEDGE BASE -->
+        <div class="s-section" id="sec-knowledge">
+          <h2>Knowledge Base</h2><p>Feed documents and links to make OdooXYZ smarter about your specific Odoo setup.</p>
+
+          <div style="font-size:13px;font-weight:700;color:var(--grey-800);margin-bottom:10px;">📄 Upload Documents</div>
+          <div class="upload-zone" onclick="document.getElementById('kb-file-input').click()">
+            <div class="upload-zone-icon">📁</div>
+            <div class="upload-zone-title">Drop files here or click to upload</div>
+            <div class="upload-zone-sub">Supports PDF, Word, Excel, TXT files · Max 10MB each</div>
+          </div>
+          <input type="file" id="kb-file-input" multiple accept=".pdf,.doc,.docx,.txt,.xlsx,.csv" style="display:none" onchange="addKbFile(event)">
+
+          <div style="font-size:13px;font-weight:700;color:var(--grey-800);margin-bottom:10px;">🔗 Add URL / Link</div>
+          <div class="url-input-row">
+            <input type="url" id="kb-url-input" placeholder="https://www.odoo.com/documentation/17.0/...">
+            <button class="btn-primary" onclick="addKbUrl()">Add Link</button>
+          </div>
+
+          <div style="font-size:13px;font-weight:700;color:var(--grey-800);margin-bottom:10px;">📚 Your Knowledge Base</div>
+          <div id="kb-list">
+            <div style="color:var(--grey-400);font-size:13px;padding:20px;text-align:center;border:1.5px dashed var(--grey-200);border-radius:var(--radius);">
+              No documents added yet. Upload PDFs or add links above.
+            </div>
+          </div>
+
+          <div style="margin-top:16px;padding:14px;background:var(--primary-light);border-radius:var(--radius);border:1.5px solid rgba(124,58,237,0.2);">
+            <div style="font-size:12px;font-weight:700;color:var(--primary);margin-bottom:6px;">💡 What to add for best results</div>
+            <div style="font-size:12px;color:var(--grey-600);line-height:1.8;">
+              ✓ Odoo official documentation PDFs<br>
+              ✓ Your implementation SOPs and checklists<br>
+              ✓ Client requirement documents<br>
+              ✓ Common configuration guides<br>
+              ✓ Your company's Odoo setup notes
+            </div>
+          </div>
+        </div>
+
+        <!-- FEATURES -->
+        <div class="s-section" id="sec-features">
+          <h2>Features</h2><p>Configure AI agent behaviour and preferences.</p>
+          <div class="feat-row">
+            <div class="feat-info"><div class="feat-t">Always ask clarifying questions first</div><div class="feat-d">Agent asks which company, warehouse etc before implementing</div></div>
+            <div class="toggle on" onclick="toggleFeat(this)"><div class="thumb"></div></div>
+          </div>
+          <div class="feat-row">
+            <div class="feat-info"><div class="feat-t">Require confirmation before implementing</div><div class="feat-d">Agent shows plan and waits for your approval</div></div>
+            <div class="toggle on" onclick="toggleFeat(this)"><div class="thumb"></div></div>
+          </div>
+          <div class="feat-row">
+            <div class="feat-info"><div class="feat-t">Show credit usage per message</div><div class="feat-d">Display credits consumed after each AI operation</div></div>
+            <div class="toggle on" onclick="toggleFeat(this)"><div class="thumb"></div></div>
+          </div>
+          <div class="feat-row">
+            <div class="feat-info"><div class="feat-t">Auto-implement on staging only</div><div class="feat-d">Never implement on production without explicit confirmation</div></div>
+            <div class="toggle on" onclick="toggleFeat(this)"><div class="thumb"></div></div>
+          </div>
+          <div class="feat-row">
+            <div class="feat-info"><div class="feat-t">GitHub auto-deploy</div><div class="feat-d">Auto push generated code to connected repository</div></div>
+            <div class="toggle off" onclick="toggleFeat(this)"><div class="thumb"></div></div>
+          </div>
+          <div class="feat-row">
+            <div class="feat-info"><div class="feat-t">Smart credit alerts</div><div class="feat-d">Notify when credits fall below 200 and 100</div></div>
+            <div class="toggle on" onclick="toggleFeat(this)"><div class="thumb"></div></div>
+          </div>
+        </div>
+
+        <!-- BILLING -->
+        <div class="s-section" id="sec-billing">
+          <h2>Billing & Plans</h2><p>Upgrade to unlock more credits and features.</p>
+          <div class="plans">
+            <div class="plan">
+              <div class="plan-name">🚀 Starter</div>
+              <div class="plan-price">₹0 <span>/month</span></div>
+              <ul class="plan-feats"><li>1,000 credits/month</li><li>3 client projects</li><li>Basic Odoo modules</li><li>Email support</li></ul>
+              <button class="plan-btn" style="background:var(--grey-200);color:var(--grey-600);cursor:default;">Current Plan</button>
+            </div>
+            <div class="plan pop">
+              <div class="pop-badge">MOST POPULAR</div>
+              <div class="plan-name">⚡ Professional</div>
+              <div class="plan-price">₹2,999 <span>/month</span></div>
+              <ul class="plan-feats"><li>15,000 credits/month</li><li>Unlimited client projects</li><li>All Odoo modules</li><li>GitHub integration</li><li>Priority support</li><li>Advanced analytics</li></ul>
+              <button class="plan-btn" onclick="toast('Redirecting to payment...')">Upgrade to Pro →</button>
+            </div>
+            <div class="plan">
+              <div class="plan-name">🏢 Agency</div>
+              <div class="plan-price">₹7,999 <span>/month</span></div>
+              <ul class="plan-feats"><li>Unlimited credits</li><li>Unlimited projects</li><li>White label option</li><li>Custom AI training</li><li>Dedicated support</li><li>5 team member seats</li></ul>
+              <button class="plan-btn" onclick="toast('Contact sales@odooxyz.in for Agency plan')">Contact Sales →</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- AFFILIATE -->
+        <div class="s-section" id="sec-affiliate">
+          <h2>Affiliate Program</h2><p>Earn 30% commission for every paying customer you refer.</p>
+          <div class="aff-card">
+            <h3>🤝 Your Affiliate Dashboard</h3>
+            <p>Share your unique link and earn ₹900 per Professional referral every month they stay subscribed.</p>
+            <div class="aff-code"><span id="aff-code">ODOOXYZ-USER-2024</span><button class="copy-btn" onclick="copyAff()">Copy Link</button></div>
+          </div>
+          <div class="stats-grid">
+            <div class="stat-box"><div class="stat-val" style="color:var(--primary);">0</div><div class="stat-lbl">Referrals</div></div>
+            <div class="stat-box"><div class="stat-val" style="color:var(--green);">₹0</div><div class="stat-lbl">Earned</div></div>
+            <div class="stat-box"><div class="stat-val" style="color:var(--orange);">₹0</div><div class="stat-lbl">Pending</div></div>
+          </div>
+          <div style="background:var(--grey-50);border-radius:var(--radius);padding:16px;">
+            <div style="font-size:13px;font-weight:700;color:var(--grey-800);margin-bottom:12px;">How it works</div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <div style="display:flex;align-items:center;gap:10px;font-size:12px;color:var(--grey-600);"><span style="width:22px;height:22px;background:var(--primary-light);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--primary);font-size:11px;flex-shrink:0;">1</span>Share your unique affiliate link with Odoo consultants and partners</div>
+              <div style="display:flex;align-items:center;gap:10px;font-size:12px;color:var(--grey-600);"><span style="width:22px;height:22px;background:var(--primary-light);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--primary);font-size:11px;flex-shrink:0;">2</span>They sign up and subscribe to Professional or Agency plan</div>
+              <div style="display:flex;align-items:center;gap:10px;font-size:12px;color:var(--grey-600);"><span style="width:22px;height:22px;background:var(--primary-light);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--primary);font-size:11px;flex-shrink:0;">3</span>You earn 30% recurring commission every month they stay</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- GitHub Modal -->
+<div class="overlay" id="gh-modal">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-hdr"><div class="modal-title">GitHub Integration</div><button class="modal-x" onclick="closeModal('gh-modal')">✕</button></div>
+    <div class="modal-body">
+      <div class="gh-connect">
+        <div class="gh-icon"><svg width="52" height="52" viewBox="0 0 24 24" fill="#24292e"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg></div>
+        <div class="gh-status no" id="gh-status">Not Connected to GitHub</div>
+        <button class="gh-btn" onclick="connectGh()"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg> Connect GitHub Account</button>
+      </div>
+      <div class="repo-list" id="repo-list" style="display:none;">
+        <div style="font-size:13px;font-weight:700;color:var(--grey-800);margin-bottom:10px;">Your Repositories</div>
+        <div class="repo-item"><div><div class="repo-nm">odoo-client-modules</div><div class="repo-br">main branch</div></div><button class="deploy-btn" onclick="toast('✅ Deployed to odoo-client-modules!')">Deploy</button></div>
+        <div class="repo-item"><div><div class="repo-nm">custom-odoo-17</div><div class="repo-br">develop branch</div></div><button class="deploy-btn" onclick="toast('✅ Deployed to custom-odoo-17!')">Deploy</button></div>
+        <div class="repo-item"><div><div class="repo-nm">odooxyz-modules</div><div class="repo-br">staging branch</div></div><button class="deploy-btn" onclick="toast('✅ Deployed to odooxyz-modules!')">Deploy</button></div>
+      </div>
+      <div style="margin-top:14px;padding:12px;background:var(--grey-50);border-radius:var(--radius-sm);font-size:12px;color:var(--grey-400);line-height:1.6;">
+        💡 When OdooXYZ generates Python or XML code, push it directly to GitHub and deploy to your Odoo server automatically.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Context Menu -->
+<div id="ctx" class="ctx" style="display:none;">
+  <div class="ctx-item" onclick="ctxDo('pin')">📌 Pin conversation</div>
+  <div class="ctx-item" onclick="ctxDo('rename')">✏️ Rename</div>
+  <div class="ctx-item danger" onclick="ctxDo('delete')">🗑 Delete</div>
+</div>
+
+<script>
+// ══ GEMINI API KEY — REPLACE THIS ══
+const GEMINI_API_KEY = 'AIzaSyCppcG_kagMTSI4v47XM-WDvVWMvCqUJTQ';
+const GEMINI_MODEL = 'gemini-1.5-flash';
+
+// ══ STATE ══
+let sessions = JSON.parse(localStorage.getItem('xyz_sessions') || '[]');
+let projects = JSON.parse(localStorage.getItem('xyz_projects') || '[]');
+let knowledgeBase = JSON.parse(localStorage.getItem('xyz_kb') || '[]');
+let credits = parseInt(localStorage.getItem('xyz_credits') || '1000');
+let curSession = null, curProject = null;
+let messages = [], attachments = [];
+let isLoading = false, selColor_val = '#7C3AED', ctxSessId = null;
+let ghConnected = JSON.parse(localStorage.getItem('xyz_gh') || 'false');
+
+// ══ SYSTEM PROMPT — THE BRAIN ══
+function buildSystemPrompt() {
+  const proj = projects.find(p => p.id === curProject);
+  const projCtx = proj ? `
+ACTIVE PROJECT: ${proj.name}
+CLIENT: ${proj.client}
+ODOO URL: ${proj.url}
+DATABASE: ${proj.db}
+LOGIN: ${proj.login}` : '';
+
+  const kbCtx = knowledgeBase.length > 0 ? `
+KNOWLEDGE BASE DOCUMENTS AVAILABLE:
+${knowledgeBase.map(k => `- ${k.name}: ${k.summary || 'No summary available'}`).join('\n')}` : '';
+
+  return `You are OdooXYZ AI — an expert Odoo Functional Consultant AI.
+${projCtx}
+${kbCtx}
+
+═══════════════════════════════════════════
+CRITICAL RULES — YOU MUST ALWAYS FOLLOW THESE
+═══════════════════════════════════════════
+
+RULE 1 — ALWAYS ASK BEFORE IMPLEMENTING:
+Never implement anything without first asking all clarifying questions.
+Always gather complete information before taking any action.
+
+RULE 2 — MULTI-COMPANY RULE (VERY IMPORTANT):
+If the database has multiple companies, ALWAYS ask which company to work in.
+NEVER assume or default to any company.
+Ask: "Your database has multiple companies. Which company should I work in?"
+
+RULE 3 — MISSING INFORMATION RULE:
+If ANY of these are missing, ASK before proceeding:
+- Which company to work in
+- Customer / vendor name
+- Product name and price  
+- Warehouse (if inventory involved)
+- Account code (if accounting involved)
+- Tax percentage (if sales/purchase)
+- Payment terms details
+
+RULE 4 — CONFIRMATION RULE:
+After gathering all info, ALWAYS show a plan summary like:
+"Here is what I will implement:
+✓ Company: [name]
+✓ Action: [what you will do]
+✓ Details: [all specifics]
+Shall I proceed? (Reply Yes to confirm)"
+
+Only execute AFTER user confirms with Yes.
+
+RULE 5 — STAGING ONLY:
+Always remind that implementation is on staging/testing database only.
+Never implement on production without explicit mention.
+
+RULE 6 — BE HONEST:
+If something cannot be done via API, explain clearly and suggest manual steps.
+Never pretend to implement something you cannot.
+
+═══════════════════════════════════════════
+YOUR QUESTION TEMPLATES
+═══════════════════════════════════════════
+
+For customer creation ask:
+1. Which company?
+2. Customer name?
+3. Email address?
+4. Phone number?
+5. Payment terms?
+6. Any other details?
+
+For product creation ask:
+1. Which company?
+2. Product name?
+3. Product type (Storable / Consumable / Service)?
+4. Sales price?
+5. Purchase price?
+6. Product category?
+7. Tax?
+
+For sales order ask:
+1. Which company?
+2. Which customer?
+3. Products and quantities?
+4. Delivery date?
+5. Payment terms?
+
+Always be friendly, professional, and thorough.
+Format responses clearly with bullet points when listing items.`;
+}
+
+// ══ LOGIN ══
+function doLogin() {
+  const email = document.getElementById('l-email').value;
+  const pass = document.getElementById('l-pass').value;
+  if (!email || !pass) { toast('Please enter email and password'); return; }
+  const user = { email, name: email.split('@')[0] };
+  localStorage.setItem('xyz_user', JSON.stringify(user));
+  document.getElementById('login-page').style.display = 'none';
+  document.getElementById('app').classList.add('visible');
+  setUser(user);
+  renderHist();
+  renderProjects();
+  renderKb();
+  updateCredits();
+  if (ghConnected) updateGhUI(true);
+}
+
+function doLogout() {
+  localStorage.removeItem('xyz_user');
+  document.getElementById('login-page').style.display = 'flex';
+  document.getElementById('app').classList.remove('visible');
+}
+
+function setUser(u) {
+  const n = u.name.charAt(0).toUpperCase() + u.name.slice(1);
+  document.getElementById('sb-av').textContent = n.charAt(0);
+  document.getElementById('sb-nm').textContent = n;
+  const pn = document.getElementById('pf-name');
+  const pe = document.getElementById('pf-email');
+  const pb = document.getElementById('pav-big');
+  const pnm = document.getElementById('pav-nm');
+  const pem = document.getElementById('pav-em');
+  if (pn) pn.value = n;
+  if (pe) pe.value = u.email;
+  if (pb) pb.textContent = n.charAt(0);
+  if (pnm) pnm.textContent = n;
+  if (pem) pem.textContent = u.email;
+  const ac = document.getElementById('aff-code');
+  if (ac) ac.textContent = 'ODOOXYZ-' + n.toUpperCase().slice(0,5) + '-2024';
+}
+
+window.onload = () => {
+  const u = JSON.parse(localStorage.getItem('xyz_user') || 'null');
+  if (u) {
+    document.getElementById('login-page').style.display = 'none';
+    document.getElementById('app').classList.add('visible');
+    setUser(u);
+    renderHist();
+    renderProjects();
+    renderKb();
+    updateCredits();
+    if (ghConnected) updateGhUI(true);
+  }
+  document.addEventListener('click', e => {
+    if (!e.target.closest('#ctx')) document.getElementById('ctx').style.display = 'none';
+  });
+};
+
+// ══ CREDITS ══
+function updateCredits() {
+  const el = document.getElementById('cr-count');
+  const badge = document.getElementById('cr-badge');
+  if (!el) return;
+  el.textContent = credits.toLocaleString('en-IN');
+  badge.classList.remove('low','critical');
+  if (credits < 100) { el.style.color = 'var(--red)'; badge.classList.add('critical'); }
+  else if (credits < 300) { el.style.color = 'var(--orange)'; badge.classList.add('low'); }
+  else { el.style.color = 'var(--primary)'; }
+  const total = 1000, used = total - credits;
+  const fill = document.getElementById('cb-fill');
+  const val = document.getElementById('cb-val');
+  if (fill) fill.style.width = Math.min((used/total)*100,100) + '%';
+  if (val) val.textContent = used + ' / ' + total;
+}
+
+function deductCredits(n) {
+  credits = Math.max(0, credits - n);
+  localStorage.setItem('xyz_credits', credits);
+  const b = document.getElementById('cr-badge');
+  b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop');
+  updateCredits();
+  if (credits === 99) toast('⚠️ Low credits! Only 99 remaining. Please upgrade.');
+  return n;
+}
+
+// ══ PROJECTS ══
+function toggleProjDD() {
+  const dd = document.getElementById('proj-dd');
+  const arr = document.getElementById('proj-arrow');
+  dd.classList.toggle('open');
+  arr.classList.toggle('open');
+}
+
+function renderProjects() {
+  const list = document.getElementById('proj-dd-list');
+  if (!list) return;
+  list.innerHTML = projects.length === 0
+    ? '<div style="padding:10px 14px;font-size:11px;color:rgba(255,255,255,0.25);text-align:center;">No projects yet</div>'
+    : projects.map(p => `
+      <div class="proj-dd-item ${p.id === curProject ? 'active' : ''}" onclick="selectProj('${p.id}')">
+        <div class="pdi-dot" style="background:${p.color}"></div>
+        <div><div class="pdi-name">${p.name}</div><div class="pdi-client">${p.client}</div></div>
+        ${p.id === curProject ? '<span class="pdi-check">✓</span>' : ''}
+      </div>`).join('');
+
+  const sl = document.getElementById('proj-settings-list');
+  if (sl) {
+    sl.innerHTML = projects.length === 0
+      ? '<div style="color:var(--grey-400);font-size:13px;margin-bottom:14px;">No projects yet.</div>'
+      : projects.map(p => `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border:1.5px solid var(--grey-200);border-radius:var(--radius-sm);margin-bottom:8px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:10px;height:10px;border-radius:50%;background:${p.color};flex-shrink:0;"></div>
+            <div><div style="font-size:13px;font-weight:700;">${p.name}</div><div style="font-size:11px;color:var(--grey-400);">${p.client} · ${p.url||'No URL'}</div></div>
+          </div>
+          <div style="display:flex;gap:6px;">
+            <button onclick="selectProj('${p.id}');closeModal('settings-modal')" style="padding:5px 10px;background:var(--primary-light);color:var(--primary);border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">Switch</button>
+            <button onclick="delProj('${p.id}')" style="padding:5px 10px;background:var(--red-light);color:var(--red);border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">Delete</button>
+          </div>
+        </div>`).join('');
+  }
+}
+
+function selectProj(id) {
+  curProject = id;
+  const p = projects.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('cur-proj-name').textContent = p.name;
+  document.getElementById('cur-proj-client').textContent = p.client;
+  document.getElementById('cur-proj-dot').style.background = p.color;
+  document.getElementById('hdr-sub').textContent = `${p.client} · ${p.url||'No URL'}`;
+  document.getElementById('proj-dd').classList.remove('open');
+  document.getElementById('proj-arrow').classList.remove('open');
+  renderProjects();
+  newChat();
+  toast(`Switched to "${p.name}"`);
+}
+
+function openNewProj() {
+  document.getElementById('proj-dd').classList.remove('open');
+  document.getElementById('proj-arrow').classList.remove('open');
+  openModal('proj-modal');
+}
+
+function selColor(el) {
+  document.querySelectorAll('.cdot').forEach(d => d.classList.remove('sel'));
+  el.classList.add('sel');
+  selColor_val = el.dataset.c;
+}
+
+function saveProj() {
+  const client = document.getElementById('p-client').value.trim();
+  const name = document.getElementById('p-name').value.trim();
+  const url = document.getElementById('p-url').value.trim();
+  const db = document.getElementById('p-db').value.trim();
+  const login = document.getElementById('p-login').value.trim();
+  const pass = document.getElementById('p-pass').value.trim();
+  if (!client || !name) { toast('Please fill Client Name and Project Name'); return; }
+  const proj = { id: Date.now().toString(), client, name, url, db, login, pass, color: selColor_val };
+  projects.push(proj);
+  localStorage.setItem('xyz_projects', JSON.stringify(projects));
+  closeModal('proj-modal');
+  renderProjects();
+  selectProj(proj.id);
+  toast(`✅ Project "${name}" created!`);
+  ['p-client','p-name','p-url','p-db','p-login','p-pass'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+}
+
+function delProj(id) {
+  if (!confirm('Delete this project?')) return;
+  projects = projects.filter(p => p.id !== id);
+  localStorage.setItem('xyz_projects', JSON.stringify(projects));
+  if (curProject === id) {
+    curProject = null;
+    document.getElementById('cur-proj-name').textContent = 'Select Project';
+    document.getElementById('cur-proj-client').textContent = 'No project selected';
+    document.getElementById('cur-proj-dot').style.background = 'var(--primary-glow)';
+  }
+  renderProjects();
+  toast('Project deleted');
+}
+
+// ══ KNOWLEDGE BASE ══
+function renderKb() {
+  const list = document.getElementById('kb-list');
+  if (!list) return;
+  if (knowledgeBase.length === 0) {
+    list.innerHTML = '<div style="color:var(--grey-400);font-size:13px;padding:20px;text-align:center;border:1.5px dashed var(--grey-200);border-radius:var(--radius);">No documents added yet. Upload PDFs or add links above.</div>';
+    return;
+  }
+  list.innerHTML = knowledgeBase.map(k => `
+    <div class="kb-item">
+      <div class="kb-left">
+        <div class="kb-icon">${k.type === 'url' ? '🔗' : '📄'}</div>
+        <div><div class="kb-name">${k.name}</div><div class="kb-size">${k.size || k.url || ''}</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span class="kb-status ready">Ready</span>
+        <button class="kb-del" onclick="delKb('${k.id}')">🗑</button>
+      </div>
+    </div>`).join('');
+}
+
+function addKbFile(e) {
+  const files = Array.from(e.target.files);
+  files.forEach(f => {
+    const size = f.size < 1048576 ? (f.size/1024).toFixed(1)+'KB' : (f.size/1048576).toFixed(1)+'MB';
+    knowledgeBase.push({ id: Date.now().toString()+Math.random(), name: f.name, size, type: 'file', summary: `Document: ${f.name}` });
+  });
+  localStorage.setItem('xyz_kb', JSON.stringify(knowledgeBase));
+  renderKb();
+  toast(`✅ ${files.length} file(s) added to knowledge base`);
+  e.target.value = '';
+}
+
+function addKbUrl() {
+  const url = document.getElementById('kb-url-input').value.trim();
+  if (!url) { toast('Please enter a URL'); return; }
+  if (!url.startsWith('http')) { toast('Please enter a valid URL starting with http'); return; }
+  const name = url.split('/').filter(Boolean).pop() || url;
+  knowledgeBase.push({ id: Date.now().toString(), name, url, type: 'url', summary: `URL: ${url}` });
+  localStorage.setItem('xyz_kb', JSON.stringify(knowledgeBase));
+  renderKb();
+  document.getElementById('kb-url-input').value = '';
+  toast('✅ URL added to knowledge base');
+}
+
+function delKb(id) {
+  knowledgeBase = knowledgeBase.filter(k => k.id !== id);
+  localStorage.setItem('xyz_kb', JSON.stringify(knowledgeBase));
+  renderKb();
+  toast('Removed from knowledge base');
+}
+
+// ══ CHAT ══
+function newChat() {
+  curSession = null; messages = []; attachments = [];
+  const as = document.getElementById('attach-strip');
+  as.innerHTML = ''; as.style.display = 'none';
+  const area = document.getElementById('msgs-area');
+  area.innerHTML = `<div class="welcome" id="welcome">
+    <div class="welcome-icon">🤖</div>
+    <div class="welcome-title">What shall we implement today?</div>
+    <div class="welcome-sub">I'll always ask the right questions before doing anything.</div>
+    <div class="sug-grid">
+      <button class="sug-card" onclick="useSug('I want to create some customers in Odoo')"><div class="sug-em">👥</div><div class="sug-t">Create Customers</div><div class="sug-d">Add customers automatically</div></button>
+      <button class="sug-card" onclick="useSug('I want to set up products with prices')"><div class="sug-em">📦</div><div class="sug-t">Setup Products</div><div class="sug-d">Create product catalogue</div></button>
+      <button class="sug-card" onclick="useSug('I want to configure payment terms')"><div class="sug-em">💳</div><div class="sug-t">Payment Terms</div><div class="sug-d">Set up payment configs</div></button>
+      <button class="sug-card" onclick="useSug('I want to create a sales order')"><div class="sug-em">🧾</div><div class="sug-t">Sales Orders</div><div class="sug-d">Create sales orders</div></button>
+    </div>
+  </div>`;
+  const p = curProject ? projects.find(x => x.id === curProject) : null;
+  document.getElementById('hdr-title').textContent = p ? p.name : 'New Chat';
+  document.querySelectorAll('.hist-item').forEach(el => el.classList.remove('active'));
+}
+
+function saveSess(firstMsg) {
+  const id = curSession || (curSession = Date.now().toString());
+  const existing = sessions.find(s => s.id === id);
+  const s = { id, title: firstMsg.slice(0,40)+(firstMsg.length>40?'…':''), date: new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short'}), projectId: curProject, messages: [...messages], pinned: existing?.pinned||false };
+  const idx = sessions.findIndex(x => x.id === id);
+  if (idx >= 0) sessions[idx] = s; else sessions.unshift(s);
+  localStorage.setItem('xyz_sessions', JSON.stringify(sessions));
+  renderHist();
+}
+
+function renderHist() {
+  const c = document.getElementById('chat-hist');
+  const filtered = curProject ? sessions.filter(s => s.projectId === curProject) : sessions;
+  if (filtered.length === 0) { c.innerHTML = '<div class="no-hist">No conversations yet.<br>Start a new chat above.</div>'; return; }
+  const pinned = filtered.filter(s => s.pinned);
+  const unpinned = filtered.filter(s => !s.pinned);
+  c.innerHTML = [...pinned,...unpinned].map(s => `
+    <div class="hist-item ${s.id===curSession?'active':''}" onclick="loadSess('${s.id}')" oncontextmenu="showCtx(event,'${s.id}')">
+      <span class="hist-icon">${s.pinned?'📌':'💬'}</span>
+      <span class="hist-text">${s.title}</span>
+      <div class="hist-acts">
+        <button class="ha" onclick="event.stopPropagation();showCtx(event,'${s.id}')">⋯</button>
+        <button class="ha del" onclick="event.stopPropagation();delSess('${s.id}')">🗑</button>
+      </div>
+    </div>`).join('');
+}
+
+function loadSess(id) {
+  const s = sessions.find(x => x.id === id);
+  if (!s) return;
+  curSession = id; messages = [...(s.messages||[])];
+  document.getElementById('hdr-title').textContent = s.title;
+  const area = document.getElementById('msgs-area');
+  area.innerHTML = '';
+  messages.forEach(m => renderMsg(m.role, m.content, false));
+  renderHist();
+}
+
+function delSess(id) {
+  sessions = sessions.filter(s => s.id !== id);
+  localStorage.setItem('xyz_sessions', JSON.stringify(sessions));
+  if (curSession === id) newChat();
+  renderHist();
+  toast('Conversation deleted');
+}
+
+// Context Menu
+function showCtx(e, id) {
+  e.preventDefault(); e.stopPropagation();
+  ctxSessId = id;
+  const m = document.getElementById('ctx');
+  m.style.display = 'block';
+  m.style.left = Math.min(e.clientX, window.innerWidth-170)+'px';
+  m.style.top = Math.min(e.clientY, window.innerHeight-130)+'px';
+}
+
+function ctxDo(action) {
+  const s = sessions.find(x => x.id === ctxSessId);
+  document.getElementById('ctx').style.display = 'none';
+  if (!s) return;
+  if (action === 'pin') { s.pinned = !s.pinned; localStorage.setItem('xyz_sessions', JSON.stringify(sessions)); renderHist(); toast(s.pinned ? '📌 Pinned' : 'Unpinned'); }
+  else if (action === 'rename') { const n = prompt('Rename:', s.title); if (n?.trim()) { s.title = n.trim(); localStorage.setItem('xyz_sessions', JSON.stringify(sessions)); renderHist(); toast('✅ Renamed'); } }
+  else if (action === 'delete') delSess(ctxSessId);
+}
+
+// ══ MESSAGES ══
+function useSug(text) { document.getElementById('msg-input').value = text; sendMsg(); }
+function handleKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); } }
+function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight,140)+'px'; }
+function clearInput() { document.getElementById('msg-input').value = ''; document.getElementById('msg-input').style.height = 'auto'; attachments = []; const as = document.getElementById('attach-strip'); as.innerHTML = ''; as.style.display = 'none'; }
+function getTime() { return new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}); }
+
+function renderMsg(role, content, animate=true) {
+  const w = document.getElementById('welcome');
+  if (w) w.remove();
+  const area = document.getElementById('msgs-area');
+  const div = document.createElement('div');
+  div.className = `msg-row ${role}`;
+  const fmt = content.replace(/\n/g,'<br>').replace(/`([^`]+)`/g,'<code style="background:var(--grey-100);padding:1px 5px;border-radius:4px;font-family:\'JetBrains Mono\',monospace;font-size:11px;">$1</code>');
+  div.innerHTML = `
+    <div class="msg-av ${role}">${role==='ai'?'🤖':'👤'}</div>
+    <div class="msg-body">
+      <div class="msg-sender">${role==='ai'?'OdooXYZ AI':'You'}</div>
+      <div class="msg-bubble">${fmt}</div>
+      <div class="msg-time">${getTime()}</div>
+    </div>`;
+  area.appendChild(div);
+  area.scrollTop = area.scrollHeight;
+}
+
+function showTyping() {
+  const w = document.getElementById('welcome'); if (w) w.remove();
+  const area = document.getElementById('msgs-area');
+  const div = document.createElement('div');
+  div.className = 'msg-row ai'; div.id = 'typing-row';
+  div.innerHTML = `<div class="msg-av ai">🤖</div><div class="msg-body"><div class="msg-sender">OdooXYZ AI</div><div class="typing-ind"><div class="t-dot"></div><div class="t-dot"></div><div class="t-dot"></div></div></div>`;
+  area.appendChild(div);
+  area.scrollTop = area.scrollHeight;
+}
+
+function removeTyping() { const el = document.getElementById('typing-row'); if (el) el.remove(); }
+
+// ══ FILE ATTACHMENTS ══
+function handleFiles(e) {
+  const files = Array.from(e.target.files);
+  const as = document.getElementById('attach-strip');
+  files.forEach(f => {
+    attachments.push(f);
+    const size = f.size < 1048576 ? (f.size/1024).toFixed(1)+'KB' : (f.size/1048576).toFixed(1)+'MB';
+    const chip = document.createElement('div');
+    chip.className = 'attach-chip';
+    chip.innerHTML = `📎 ${f.name} <span style="opacity:0.6">${size}</span> <button onclick="removeAtt('${f.name}',this.parentElement)">✕</button>`;
+    as.appendChild(chip);
+  });
+  as.style.display = attachments.length ? 'flex' : 'none';
+  e.target.value = '';
+}
+
+function removeAtt(name, chip) {
+  attachments = attachments.filter(f => f.name !== name);
+  chip.remove();
+  if (!attachments.length) { const as = document.getElementById('attach-strip'); as.style.display = 'none'; }
+}
+
+// ══ SEND MESSAGE ══
+async function sendMsg() {
+  const input = document.getElementById('msg-input');
+  const text = input.value.trim();
+  if ((!text && !attachments.length) || isLoading) return;
+  if (!curSession) curSession = Date.now().toString();
+
+  let display = text;
+  if (attachments.length) display += `\n\n📎 Attached: ${attachments.map(f=>f.name).join(', ')}`;
+
+  input.value = ''; input.style.height = 'auto';
+  attachments = [];
+  document.getElementById('attach-strip').innerHTML = '';
+  document.getElementById('attach-strip').style.display = 'none';
+
+  isLoading = true;
+  document.getElementById('send-btn').disabled = true;
+
+  messages.push({ role: 'user', content: display });
+  renderMsg('user', display);
+  if (messages.length === 1) saveSess(text || 'Attachment');
+  showTyping();
+
+  try {
+    const resp = await callGemini(text || 'Analyse the attached files');
+    removeTyping();
+    messages.push({ role: 'ai', content: resp });
+    const used = deductCredits(estimateCredits(text, resp));
+    renderMsg('ai', resp);
+    // Credit badge
+    const area = document.getElementById('msgs-area');
+    const badge = document.createElement('div');
+    badge.style.cssText = 'padding:0 24px;max-width:860px;margin:0 auto;width:100%;';
+    badge.innerHTML = `<span class="msg-credit">⚡ ${used} credits used</span>`;
+    area.appendChild(badge);
+    saveSess(messages[0].content);
+  } catch(err) {
+    removeTyping();
+    renderMsg('ai', '⚠️ Could not connect to AI. Please check your Gemini API key and internet connection.');
+    console.error(err);
+  }
+
+  isLoading = false;
+  document.getElementById('send-btn').disabled = false;
+  input.focus();
+}
+
+function estimateCredits(input, output) {
+  const totalChars = (input||'').length + (output||'').length;
+  const tokens = Math.ceil(totalChars / 4);
+  // Gemini Flash: ~0.075 per 1M input + 0.30 per 1M output tokens
+  // In credit terms (1 credit = ₹0.01): very cheap
+  return Math.max(1, Math.ceil(tokens / 500));
+}
+
+// ══ GEMINI API CALL ══
+async function callGemini(userMessage) {
+  if (!GEMINI_API_KEY || GEMINI_API_KEY === 'AIzaSyCppcG_kagMTSI4v47XM-WDvVWMvCqUJTQ') {
+    return `⚠️ Gemini API key not configured yet!\n\nTo make OdooXYZ work:\n1. Go to aistudio.google.com\n2. Create API key\n3. Open this HTML file\n4. Find: const GEMINI_API_KEY = 'AIzaSyCppcG_kagMTSI4v47XM-WDvVWMvCqUJTQ'\n5. Replace with your actual key\n6. Save and refresh\n\nFor now I can show you how the interface works!`;
+  }
+
+  const systemPrompt = buildSystemPrompt();
+  const history = messages.slice(0, -1).map(m => ({
+    role: m.role === 'ai' ? 'model' : 'user',
+    parts: [{ text: m.content }]
+  }));
+
+  const body = {
+    system_instruction: { parts: [{ text: systemPrompt }] },
+    contents: [...history, { role: 'user', parts: [{ text: userMessage }] }],
+    generationConfig: { temperature: 0.3, maxOutputTokens: 1024 }
+  };
+
+  const resp = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
+    { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
+  );
+
+  const data = await resp.json();
+  if (data.error) throw new Error(data.error.message);
+  return data.candidates?.[0]?.content?.parts?.[0]?.text || 'Could not get response. Please try again.';
+}
+
+// ══ MODALS ══
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function openSettings(sec) { openModal('settings-modal'); switchSec(sec||'profile'); if(sec==='projects')renderProjects(); if(sec==='knowledge')renderKb(); updateCredits(); }
+
+function switchSec(sec) {
+  document.querySelectorAll('.sn-item').forEach(el => el.classList.toggle('active', el.dataset.sec===sec));
+  document.querySelectorAll('.s-section').forEach(el => el.classList.toggle('active', el.id==='sec-'+sec));
+  if (sec==='projects') renderProjects();
+  if (sec==='knowledge') renderKb();
+}
+
+function switchStab(sec, tab) {
+  const parent = document.getElementById('sec-'+sec);
+  if (!parent) return;
+  parent.querySelectorAll('.stab').forEach(el => el.classList.toggle('active', el.getAttribute('onclick')?.includes(`'${tab}'`)));
+  parent.querySelectorAll('.stab-content').forEach(el => el.classList.toggle('active', el.id===sec+'-'+tab));
+}
+
+function saveProfile() {
+  const name = document.getElementById('pf-name')?.value.trim();
+  const email = document.getElementById('pf-email')?.value.trim();
+  if (!name||!email) { toast('Please fill all fields'); return; }
+  const user = { name, email };
+  localStorage.setItem('xyz_user', JSON.stringify(user));
+  setUser(user);
+  toast('✅ Profile saved');
+}
+
+function toggleFeat(el) {
+  el.classList.toggle('on');
+  el.classList.toggle('off');
+  toast(el.classList.contains('on') ? '✅ Feature enabled' : 'Feature disabled');
+}
+
+// ══ GITHUB ══
+function connectGh() {
+  toast('Connecting to GitHub…');
+  setTimeout(() => { ghConnected = true; localStorage.setItem('xyz_gh','true'); updateGhUI(true); toast('✅ GitHub connected!'); }, 1500);
+}
+
+function updateGhUI(c) {
+  const s = document.getElementById('gh-status');
+  const r = document.getElementById('repo-list');
+  const ls = document.getElementById('gh-link-st');
+  if (s) { s.textContent = c ? '✓ Connected to GitHub' : 'Not Connected'; s.className = 'gh-status '+(c?'ok':'no'); }
+  if (r) r.style.display = c ? 'block' : 'none';
+  if (ls) { ls.textContent = c ? 'Connected' : 'Not connected'; ls.className = 'linked-st'+(c?' ok':''); }
+}
+
+// ══ ODOO ══
+function openOdoo() {
+  const p = projects.find(x => x.id === curProject);
+  if (!p?.url) { toast('No Odoo URL configured. Add a project first.'); return; }
+  window.open(p.url, '_blank');
+}
+
+// ══ AFFILIATE ══
+function copyAff() {
+  const code = document.getElementById('aff-code').textContent;
+  navigator.clipboard.writeText('https://odooxyz.in/ref/'+code).then(() => toast('✅ Affiliate link copied!'));
+}
+
+// ══ TOAST ══
+let toastT;
+function toast(msg) {
+  const ex = document.querySelector('.toast'); if (ex) ex.remove();
+  clearTimeout(toastT);
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t);
+  toastT = setTimeout(() => t.remove(), 2800);
+}
+
+// Close overlays on click outside
+document.querySelectorAll('.overlay').forEach(o => {
+  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
+});
+</script>
+</body>
+</html>
