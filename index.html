@@ -986,7 +986,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 
 <script>
 // ══ GEMINI API KEY — REPLACE THIS ══
-const GEMINI_API_KEY = 'AIzaSyCppcG_kagMTSI4v47XM-WDvVWMvCqUJTQ';
+const GEMINI_API_KEY = 'AIzaSyA4PMiF-2Rq4O4Viwelfsk__hazLdeYGqc';
 const GEMINI_MODEL = 'gemini-1.5-flash';
 
 // ══ BACKEND URL — SET THIS AFTER DEPLOYING ON RAILWAY ══
@@ -1611,8 +1611,8 @@ function estimateCredits(input, output) {
 
 // ══ GEMINI API CALL ══
 async function callGemini(userMessage) {
-  if (!GEMINI_API_KEY || GEMINI_API_KEY === 'AIzaSyCppcG_kagMTSI4v47XM-WDvVWMvCqUJTQ') {
-    return `⚠️ Gemini API key not configured yet!\n\nTo make OdooXYZ work:\n1. Go to aistudio.google.com\n2. Create API key\n3. Open this HTML file\n4. Find: const GEMINI_API_KEY = 'AIzaSyCppcG_kagMTSI4v47XM-WDvVWMvCqUJTQ'\n5. Replace with your actual key\n6. Save and refresh\n\nFor now I can show you how the interface works!`;
+  if (!GEMINI_API_KEY || GEMINI_API_KEY === 'AIzaSyA4PMiF-2Rq4O4Viwelfsk__hazLdeYGqc') {
+    return `⚠️ Gemini API key not configured yet!\n\nTo make OdooXYZ work:\n1. Go to aistudio.google.com\n2. Create API key\n3. Open this HTML file\n4. Find: const GEMINI_API_KEY = 'AIzaSyA4PMiF-2Rq4O4Viwelfsk__hazLdeYGqc'\n5. Replace with your actual key\n6. Save and refresh\n\nFor now I can show you how the interface works!`;
   }
 
   const systemPrompt = buildSystemPrompt();
