@@ -1299,23 +1299,7 @@ async function saveProj() {
   renderProjects();
   selectProj(proj.id);
   toast(`✅ Project "${name}" created!`);
-  ['p-client','p-name','p-url','p-db','p-login','p-apikey'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
-}
-  const client = document.getElementById('p-client').value.trim();
-  const name = document.getElementById('p-name').value.trim();
-  const url = document.getElementById('p-url').value.trim();
-  const db = document.getElementById('p-db').value.trim();
-  const login = document.getElementById('p-login').value.trim();
-  const apiKey = document.getElementById('p-apikey').value.trim();
-  if (!client || !name) { toast('Please fill Client Name and Project Name'); return; }
-  const proj = { id: Date.now().toString(), client, name, url, db, login, apiKey, color: selColor_val };
-  projects.push(proj);
-  localStorage.setItem('xyz_projects', JSON.stringify(projects));
-  closeModal('proj-modal');
-  renderProjects();
-  selectProj(proj.id);
-  toast(`✅ Project "${name}" created!`);
-  ['p-client','p-name','p-url','p-db','p-login','p-apikey'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+ ['p-client','p-name','p-url','p-db','p-login','p-apikey'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
 }
 
 async function testProjConnection() {
