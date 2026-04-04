@@ -1167,7 +1167,29 @@ function setUser(u) {
   if (ac) ac.textContent = 'ODOOXYZ-' + n.toUpperCase().slice(0,5) + '-2024';
 }
 
-window.onload = () => {
+window.onload = async () => {
+  try {
+    const resp = await fetch(`${BACKEND_URL}/api/gemini/key`);
+    const data = await resp.json();
+    GEMINI_API_KEY = data.key;
+  } catch(e) {
+    console.error('Could not load config');
+  }
+  const u = JSON.parse(localStorage.getItem('xyz_user') || 'null');
+  if (u) {
+    document.getElementById('login-page').style.display = 'none';
+    document.getElementById('app').classList.add('visible');
+    setUser(u);
+    renderHist();
+    renderProjects();
+    renderKb();
+    updateCredits();
+    if (ghConnected) updateGhUI(true);
+  }
+  document.addEventListener('click', e => {
+    if (!e.target.closest('#ctx')) document.getElementById('ctx').style.display = 'none';
+  });
+};
   const u = JSON.parse(localStorage.getItem('xyz_user') || 'null');
   if (u) {
     document.getElementById('login-page').style.display = 'none';
