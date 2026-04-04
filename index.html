@@ -1190,21 +1190,6 @@ window.onload = async () => {
     if (!e.target.closest('#ctx')) document.getElementById('ctx').style.display = 'none';
   });
 };
-  const u = JSON.parse(localStorage.getItem('xyz_user') || 'null');
-  if (u) {
-    document.getElementById('login-page').style.display = 'none';
-    document.getElementById('app').classList.add('visible');
-    setUser(u);
-    renderHist();
-    renderProjects();
-    renderKb();
-    updateCredits();
-    if (ghConnected) updateGhUI(true);
-  }
-  document.addEventListener('click', e => {
-    if (!e.target.closest('#ctx')) document.getElementById('ctx').style.display = 'none';
-  });
-};
 
 // ══ CREDITS ══
 function updateCredits() {
