@@ -987,7 +987,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 <script>
 // ══ GEMINI API KEY — REPLACE THIS ══
 let GEMINI_API_KEY = '';
-const GEMINI_MODEL = 'gemini-2.5-flash-lite';
+const GEMINI_MODEL = 'gemini-1.5-flash';
 
 // ══ BACKEND URL — SET THIS AFTER DEPLOYING ON RAILWAY ══
 // Example: 'https://odooxyz-backend-production.up.railway.app'
@@ -1095,35 +1095,110 @@ Always be friendly, professional, and thorough.
 Format responses clearly with bullet points when listing items.
 
 ═══════════════════════════════════════════
-EXECUTING ODOO OPERATIONS (BACKEND CONNECTED)
+RULE 7 — ALWAYS SEARCH BEFORE CREATING (CRITICAL)
 ═══════════════════════════════════════════
 
-When the user confirms with "Yes" and you are ready to execute on Odoo, you MUST output the action as a special block AFTER your confirmation message. Use EXACTLY this format:
+NEVER assume a record exists or does not exist without actually searching Odoo first.
+Before creating any customer, product, or record — ALWAYS search first.
 
+Search product by name:
 [ODOO_ACTION]
-{
-  "model": "res.partner",
-  "method": "create",
-  "args": [{"name": "ABC Pvt Ltd", "email": "abc@test.com", "is_company": true}],
-  "kwargs": {},
-  "description": "Creating customer ABC Pvt Ltd"
-}
+{"model":"product.template","method":"search_read","args":[[["name","ilike","PRODUCT_NAME"]]],"kwargs":{"fields":["id","name","default_code","list_price","type"],"limit":5},"description":"Searching for product PRODUCT_NAME"}
 [/ODOO_ACTION]
 
-Common model/method pairs:
-- Create customer:    model="res.partner",       method="create",      args=[{"name":"...", "email":"...", "phone":"...", "is_company":true, "customer_rank":1}]
-- Create product:     model="product.template",  method="create",      args=[{"name":"...", "list_price":0, "standard_price":0, "type":"service"}]
-- Create sales order: model="sale.order",        method="create",      args=[{"partner_id":ID, "order_line":[[0,0,{"product_id":PID,"product_uom_qty":1,"price_unit":0}]]}]
-- Search customers:   model="res.partner",       method="search_read", args=[[["is_company","=",true]]], kwargs={"fields":["id","name","email"],"limit":10}
-- Search products:    model="product.template",  method="search_read", args=[[]], kwargs={"fields":["id","name","list_price"],"limit":10}
-- Create invoice:     model="account.move",      method="create",      args=[{"move_type":"out_invoice","partner_id":ID,"invoice_line_ids":[[0,0,{"name":"...","quantity":1,"price_unit":0}]]}]
+Search product by internal reference:
+[ODOO_ACTION]
+{"model":"product.template","method":"search_read","args":[[["default_code","=","REF"]]],"kwargs":{"fields":["id","name","default_code","list_price","type"],"limit":5},"description":"Searching product by internal reference REF"}
+[/ODOO_ACTION]
 
-IMPORTANT: Only output the [ODOO_ACTION] block when:
-1. User has confirmed with "Yes"
-2. You have ALL required information
-3. Backend is connected (the frontend will check this automatically)
+Search customer by name:
+[ODOO_ACTION]
+{"model":"res.partner","method":"search_read","args":[[["name","ilike","CUSTOMER_NAME"],["customer_rank",">",0]]],"kwargs":{"fields":["id","name","email","phone"],"limit":5},"description":"Searching for customer CUSTOMER_NAME"}
+[/ODOO_ACTION]
 
-If backend is not connected, instead say: "⚠️ Backend not connected. Please configure the backend URL in settings to execute operations on Odoo. For now, here are the manual steps: ..."`;
+After searching:
+- If FOUND: Tell user "I found: [details]. Shall I use this to proceed?"
+- If NOT FOUND: Tell user "I searched Odoo and could not find [name]. Shall I create it?"
+- NEVER say "does not exist" without searching first.
+
+═══════════════════════════════════════════
+RULE 8 — SALES ORDER CREATION (TECHNICAL)
+═══════════════════════════════════════════
+
+IMPORTANT: Sales order lines need product.product ID (variant), NOT product.template ID.
+Always do this sequence for sales orders:
+
+STEP 1 — Search customer to get their ID:
+[ODOO_ACTION]
+{"model":"res.partner","method":"search_read","args":[[["name","ilike","CUSTOMER_NAME"]]],"kwargs":{"fields":["id","name"],"limit":1},"description":"Getting customer ID"}
+[/ODOO_ACTION]
+
+STEP 2 — Search product.product (variant) to get correct ID for order line:
+[ODOO_ACTION]
+{"model":"product.product","method":"search_read","args":[[["default_code","=","INTERNAL_REF"]]],"kwargs":{"fields":["id","name","list_price"],"limit":1},"description":"Getting product variant ID"}
+[/ODOO_ACTION]
+
+STEP 3 — Create sales order using IDs from steps 1 and 2:
+[ODOO_ACTION]
+{"model":"sale.order","method":"create","args":[{"partner_id":CUSTOMER_ID,"order_line":[[0,0,{"product_id":PRODUCT_PRODUCT_ID,"product_uom_qty":1,"price_unit":120}]]}],"kwargs":{},"description":"Creating sales order"}
+[/ODOO_ACTION]
+
+═══════════════════════════════════════════
+RULE 9 — MULTI STEP OPERATIONS
+═══════════════════════════════════════════
+
+For operations that need multiple steps (like SO creation), do ONE step at a time.
+After each step succeeds, use the result (like an ID) in the next step.
+Tell the user what you found after each search before proceeding.
+Never skip steps or assume IDs.
+
+═══════════════════════════════════════════
+EXECUTING ODOO OPERATIONS — FULL REFERENCE
+═══════════════════════════════════════════
+
+When user confirms with "Yes", output action block AFTER your message. Use EXACTLY this format with valid JSON (use true/false/null not True/False/None):
+
+[ODOO_ACTION]
+{"model":"res.partner","method":"create","args":[{"name":"ABC Pvt Ltd","email":"abc@test.com","is_company":true,"customer_rank":1}],"kwargs":{},"description":"Creating customer ABC Pvt Ltd"}
+[/ODOO_ACTION]
+
+ALL COMMON OPERATIONS:
+
+Create customer:
+{"model":"res.partner","method":"create","args":[{"name":"...","email":"...","phone":"...","is_company":true,"customer_rank":1}],"kwargs":{}}
+
+Create vendor:
+{"model":"res.partner","method":"create","args":[{"name":"...","email":"...","phone":"...","is_company":true,"supplier_rank":1}],"kwargs":{}}
+
+Create product (template):
+{"model":"product.template","method":"create","args":[{"name":"...","default_code":"...","list_price":0,"standard_price":0,"type":"service"}],"kwargs":{}}
+
+Get product.product ID from template ID:
+{"model":"product.product","method":"search_read","args":[[["product_tmpl_id","=",TEMPLATE_ID]]],"kwargs":{"fields":["id","name"],"limit":1}}
+
+Create sales order (use product.product ID not product.template ID):
+{"model":"sale.order","method":"create","args":[{"partner_id":PARTNER_ID,"order_line":[[0,0,{"product_id":PRODUCT_PRODUCT_ID,"product_uom_qty":1,"price_unit":0}]]}],"kwargs":{}}
+
+Confirm sales order (make it real):
+{"model":"sale.order","method":"action_confirm","args":[[SALE_ORDER_ID]],"kwargs":{}}
+
+Create invoice:
+{"model":"account.move","method":"create","args":[{"move_type":"out_invoice","partner_id":PARTNER_ID,"invoice_line_ids":[[0,0,{"name":"...","quantity":1,"price_unit":0}]]}],"kwargs":{}}
+
+Create payment terms:
+{"model":"account.payment.term","method":"create","args":[{"name":"30 Days Net","line_ids":[[0,0,{"value":"balance","days":30}]]}],"kwargs":{}}
+
+Create pricelist:
+{"model":"product.pricelist","method":"create","args":[{"name":"Retail Price","currency_id":CURRENCY_ID}],"kwargs":{}}
+
+Set up warehouse:
+{"model":"stock.warehouse","method":"create","args":[{"name":"Main Warehouse","code":"MAIN"}],"kwargs":{}}
+
+IMPORTANT JSON RULES:
+- Always use lowercase: true not True, false not False, null not None
+- Always use double quotes for strings, never single quotes
+- Only output [ODOO_ACTION] block after user confirms with "Yes"
+- Do one operation at a time for multi-step tasks`;
 }
 
 // ══ LOGIN ══
@@ -1559,42 +1634,46 @@ async function sendMsg() {
     const rawResp = await callGemini(text || 'Analyse the attached files');
     removeTyping();
 
-    // Parse for Odoo action blocks
     const { cleanText, action } = parseOdooAction(rawResp);
     const used = deductCredits(estimateCredits(text, rawResp));
 
-    // Show the AI's text response (without the raw JSON block)
     messages.push({ role: 'ai', content: cleanText });
     renderMsg('ai', cleanText);
 
-    // Credit badge
     const area = document.getElementById('msgs-area');
     const badge = document.createElement('div');
     badge.style.cssText = 'padding:0 24px;max-width:860px;margin:0 auto;width:100%;';
     badge.innerHTML = `<span class="msg-credit">⚡ ${used} credits used</span>`;
     area.appendChild(badge);
 
-    // If AI wants to run an Odoo operation, execute it via backend
     if (action) {
       const execRow = document.createElement('div');
-      execRow.style.cssText = 'padding:0 24px;max-width:860px;margin:6px auto;width:100%;';
-      execRow.innerHTML = `<span style="background:var(--primary-light);border:1px solid var(--primary);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--primary);font-weight:600;">⚙️ Executing on Odoo: ${action.description || action.model + '.' + action.method}…</span>`;
+      execRow.style.cssText = 'padding:4px 24px;max-width:860px;margin:0 auto;width:100%;';
+      execRow.innerHTML = `<span style="background:var(--primary-light);border:1px solid rgba(124,58,237,0.3);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--primary);font-weight:600;display:inline-block;">⚙️ ${action.description || action.model + '.' + action.method}…</span>`;
       area.appendChild(execRow);
       area.scrollTop = area.scrollHeight;
 
       const result = await executeOdooAction(action);
+      execRow.remove();
 
+      let resultMsg = '';
       if (result.success) {
-        const successMsg = `✅ Done! Successfully executed on Odoo.\n\nResult: ${JSON.stringify(result.result, null, 2)}\n\n${typeof result.result === 'number' ? `Record ID created: ${result.result}` : ''}`;
-        messages.push({ role: 'ai', content: successMsg });
-        renderMsg('ai', successMsg);
-        execRow.remove();
+        const r = result.result;
+        if (typeof r === 'number') {
+          resultMsg = `✅ Done! Record created in Odoo with ID: ${r}\n\nYou can verify this in your Odoo database. What would you like to do next?`;
+        } else if (Array.isArray(r)) {
+          resultMsg = `✅ Search complete! Found ${r.length} record(s):\n\n${r.map(rec => `• ID ${rec.id}: ${rec.name || JSON.stringify(rec)}`).join('\n')}\n\nShall I proceed with any of these?`;
+        } else if (r === true) {
+          resultMsg = `✅ Operation completed successfully on Odoo!`;
+        } else {
+          resultMsg = `✅ Done! Result: ${JSON.stringify(r, null, 2)}`;
+        }
       } else {
-        const errMsg = `❌ Odoo operation failed.\n\n${result.error}\n\nPlease check your project credentials in Settings → Projects.`;
-        messages.push({ role: 'ai', content: errMsg });
-        renderMsg('ai', errMsg);
-        execRow.remove();
+        resultMsg = `❌ Odoo operation failed.\n\nError: ${result.error}\n\nPlease check your project credentials in Settings → Projects.`;
       }
+
+      messages.push({ role: 'ai', content: resultMsg });
+      renderMsg('ai', resultMsg);
     }
 
     saveSess(messages[0].content);
@@ -1654,12 +1733,17 @@ async function callGemini(userMessage) {
 function parseOdooAction(text) {
   const match = text.match(/\[ODOO_ACTION\]([\s\S]*?)\[\/ODOO_ACTION\]/);
   if (!match) return { cleanText: text, action: null };
-  const cleanText = text.replace(/\[ODOO_ACTION\][\s\S]*?\[\/ODOO_ACTION\]/, '').trim();
+  const cleanText = text.replace(/\[ODOO_ACTION\][\s\S]*?\[\/ODOO_ACTION\]/g, '').trim();
   try {
-    const action = JSON.parse(match[1].trim());
+    let jsonStr = match[1].trim()
+      .replace(/\bTrue\b/g, 'true')
+      .replace(/\bFalse\b/g, 'false')
+      .replace(/\bNone\b/g, 'null')
+      .replace(/'/g, '"');
+    const action = JSON.parse(jsonStr);
     return { cleanText, action };
   } catch (e) {
-    console.error('Failed to parse ODOO_ACTION JSON:', e);
+    console.error('Failed to parse ODOO_ACTION JSON:', e, match[1]);
     return { cleanText: text, action: null };
   }
 }
