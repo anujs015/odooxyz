@@ -1380,7 +1380,8 @@ function toggleAuthFields() {
   selColor_val = el.dataset.c;
 }
 
-async function saveProj() {
+['p-client','p-name','p-url','p-db','p-login','p-apikey'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+}
   const client = document.getElementById('p-client').value.trim();
   const name = document.getElementById('p-name').value.trim();
   const url = document.getElementById('p-url').value.trim();
@@ -1399,7 +1400,12 @@ async function saveProj() {
  ['p-client','p-name','p-url','p-db','p-login','p-apikey'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
 }
 
-async function testProjConnection() {
+if (result.success) {
+    toast(`✅ ${result.message}`);
+  } else {
+    toast(`❌ ${result.error}`);
+  }
+}
   const url    = document.getElementById('p-url').value.trim();
   const db     = document.getElementById('p-db').value.trim();
   const login  = document.getElementById('p-login').value.trim();
