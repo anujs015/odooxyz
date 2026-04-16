@@ -1370,7 +1370,11 @@ function openNewProj() {
   openModal('proj-modal');
 }
 
-function selColor(el) {
+function toggleAuthFields() {
+  const method = document.querySelector('input[name="p-authmethod"]:checked').value;
+  document.getElementById('p-password-row').style.display = method === 'password' ? 'block' : 'none';
+  document.getElementById('p-apikey-row').style.display  = method === 'apikey'   ? 'block' : 'none';
+}
   document.querySelectorAll('.cdot').forEach(d => d.classList.remove('sel'));
   el.classList.add('sel');
   selColor_val = el.dataset.c;
