@@ -725,7 +725,25 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
       <div class="frow"><label>Odoo URL</label><input type="text" id="p-url" placeholder="https://client.odoo.com"></div>
       <div class="frow"><label>Database Name</label><input type="text" id="p-db" placeholder="client-database-name"></div>
       <div class="frow"><label>Login Email</label><input type="email" id="p-login" placeholder="admin@client.com"></div>
-      <div class="frow"><label>API Key <span style="font-weight:400;font-size:10px;color:var(--grey-400)">(Settings → Technical → API Keys in Odoo)</span></label><input type="password" id="p-apikey" placeholder="Paste your Odoo API key here"></div>
+      <div class="frow">
+  <label>Authentication Method</label>
+  <div style="display:flex;gap:10px;margin-bottom:10px;">
+    <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:500;cursor:pointer;">
+      <input type="radio" name="p-authmethod" id="p-auth-password" value="password" onchange="toggleAuthFields()" checked> Password
+    </label>
+    <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:500;cursor:pointer;">
+      <input type="radio" name="p-authmethod" id="p-auth-apikey" value="apikey" onchange="toggleAuthFields()"> API Key
+    </label>
+  </div>
+</div>
+<div class="frow" id="p-password-row">
+  <label>Password</label>
+  <input type="password" id="p-password" placeholder="Your Odoo login password">
+</div>
+<div class="frow" id="p-apikey-row" style="display:none;">
+  <label>API Key <span style="font-weight:400;font-size:10px;color:var(--grey-400)">(Settings → Technical → API Keys)</span></label>
+  <input type="password" id="p-apikey" placeholder="Paste your Odoo API key here">
+</div>
       <div class="frow">
         <label>Project Color</label>
         <div class="color-dots">
