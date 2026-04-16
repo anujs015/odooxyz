@@ -1779,7 +1779,10 @@ function parseOdooAction(text) {
 /**
  * Execute an Odoo operation via the backend
  */
-async function executeOdooAction(action) {
+} catch (e) {
+    return { success: false, error: e.message };
+  }
+}
   const proj = projects.find(p => p.id === curProject);
 
   if (!BACKEND_URL) {
